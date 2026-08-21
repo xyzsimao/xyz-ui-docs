@@ -1,0 +1,44 @@
+{
+  "name": "xyzdocs-radix-ui",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A simple example library built by tsdown",
+  "exports": {
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.js",
+      "default": "./dist/components/*.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm build:layout && pnpm build:tailwind",
+    "build:layout": "tsdown",
+    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css ",
+    "dev": "tsdown --watch"
+  },
+  "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.20",
+    "class-variance-authority": "^0.7.1",
+    "cnfast": "^0.1.0",
+    "lucide-react": "^1.33.0"
+
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "tsdown": "^0.19.0",
+        "@tailwindcss/cli": "^4.1.18",
+        "tailwindcss": "^4.1.18",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@types/mdx": "*"
+  }
+}
