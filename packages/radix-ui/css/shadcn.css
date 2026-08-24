@@ -1,4 +1,4 @@
-/* @import './lib/default-colors.css';
+@import './lib/default-colors.css';
 
 :root,
 .dark {
@@ -33,4 +33,7 @@
 
 @theme static {
   --color-fd-error: var(--destructive);
-} */
+}
+
+
+/* @import '@xyzdocs/ui_base/css/colors/shadcn.css'; */

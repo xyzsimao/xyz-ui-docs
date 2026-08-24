@@ -1,0 +1,60 @@
+{
+  "name": "xyzdocs-core",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A simple example library built by tsdown",
+  "exports": {
+    "./toc": {
+      "types": "./dist/toc.d.ts",
+      "import": "./dist/toc.js"
+    },
+    "./link": {
+      "types": "./dist/link.d.ts",
+      "import": "./dist/link.js"
+    },
+    "./framework": {
+      "types": "./dist/framework/index.d.ts",
+      "import": "./dist/framework/index.js"
+    },
+    "./framework/*": {
+      "types": "./dist/framework/*.d.ts",
+      "import": "./dist/framework/*.js"
+    },
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "next": "16.3.0",
+    "tsdown": "^0.19.0",
+    "typescript": "^6.0.3",
+    "typescript-config": "workspace:*"
+  },
+  "peerDependencies": {
+    "@mixedbread/sdk": "^0.46.0",
+    "@orama/core": "1.x.x",
+    "@oramacloud/client": "2.x.x",
+    "@tanstack/react-router": "1.x.x",
+    "@types/react": "*",
+    "algoliasearch": "5.x.x",
+    "lucide-react": "*",
+    "next": "16.1.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router": "7.x.x",
+    "waku": "^0.26.0 || ^0.27.0",
+    "zod": "4.x.x"
+  },
+  "dependencies": {
+    "scroll-into-view-if-needed": "^3.1.0"
+  }
+}

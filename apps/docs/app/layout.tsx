@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Body } from './layout.client'
+import { RootProvider } from 'xyzdocs-radix-ui/provider/next'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,10 +24,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
-      </body>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <Body>
+        <RootProvider>
+          {/* <TreeContextProvider tree={source.getPageTree()}>
+            <Provider> */}
+          {children}
+          {/* </Provider>
+          </TreeContextProvider> */}
+        </RootProvider>
+      </Body>
     </html>
-  );
+  )
 }

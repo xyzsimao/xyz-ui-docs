@@ -1,4 +1,4 @@
-/* :root {
+:root {
   --fd-sidebar-drawer-offset: 100%;
 }
 
@@ -166,4 +166,4 @@
 
 .fd-page-tree-item-name {
   @apply inline-flex items-center gap-1 w-full;
-} */ */
+} */
