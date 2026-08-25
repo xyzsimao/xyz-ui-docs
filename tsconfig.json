@@ -4,5 +4,9 @@
     "module": "esnext",
     "moduleResolution": "bundler"
   },
-  "exclude": []
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
 }
