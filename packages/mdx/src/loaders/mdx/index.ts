@@ -83,19 +83,19 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
           break
       }
 
-      // if (docCollection) {
-      //   matter.data = await core.transformFrontmatter(
-      //     { collection: docCollection, filePath, source: value },
-      //     matter.data as Record<string, unknown>
-      //   )
-      // }
+      if (docCollection) {
+        matter.data = await core.transformFrontmatter(
+          { collection: docCollection, filePath, source: value },
+          matter.data as Record<string, unknown>,
+        )
+      }
 
-      // if (only === 'frontmatter') {
-      //   return {
-      //     code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
-      //     map: null,
-      //   }
-      // }
+      if (only === 'frontmatter') {
+        return {
+          code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
+          map: null,
+        }
+      }
 
       const { buildMDX } = await import('@/loaders/mdx/build-mdx')
       const compiled = await buildMDX(core, docCollection, {

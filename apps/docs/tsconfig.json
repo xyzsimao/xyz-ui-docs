@@ -2,13 +2,18 @@
   "extends": "typescript-config/nextjs.json",
   "compilerOptions": {
     "jsx": "react-jsx",
+      "baseUrl": ".",
+      "ignoreDeprecations": "6.0",
     "paths": {
+      "react": [
+        "./node_modules/@types/react"
+      ],
       "@/*": [
         "./*"
       ],
-      // "collections/*": [
-      //   "./.source/*"
-      // ]
+      "xyzdocs-mdx:collections/*": [
+        ".source/*"
+      ]
     },
     "plugins": [
       {
@@ -18,16 +23,15 @@
     "strictNullChecks": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
     "next-env.d.ts",
-    "next.config.js",
+    "**/*.ts",
+    "content/**/*.mdx",
+    "**/*.tsx",
     ".next/types/**/*.ts"
-,
-"next.config.mjs"
-],
-"exclude": [
-"node_modules",
-"dist"
-]
+  ],
+  "exclude": [
+    "node_modules",
+    "eslint.config.mjs",
+    "components/registry/**/*"
+  ]
 }

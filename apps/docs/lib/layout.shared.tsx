@@ -11,7 +11,7 @@ export const linkItems: LinkItemType[] = [
   {
     icon: <AlbumIcon />,
     text: 'Blog',
-    url: '/posts',
+    url: '/blog',
     active: 'nested-url',
   },
   {

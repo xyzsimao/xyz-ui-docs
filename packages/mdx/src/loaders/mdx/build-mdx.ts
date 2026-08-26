@@ -5,10 +5,10 @@ import type { StructuredData } from 'xyzdocs-core/mdx-plugins'
 import type { TOCItemType } from 'xyzdocs-core/toc'
 import type { FC } from 'react'
 import type { MDXProps } from 'mdx/types'
-// import {
-//   type PostprocessOptions,
-//   remarkPostprocess,
-// } from '@/loaders/mdx/remark-postprocess'
+import {
+  type PostprocessOptions,
+  remarkPostprocess,
+} from '@/loaders/mdx/remark-postprocess'
 import type { Core } from '@/core'
 import type { DocCollectionItem } from '@/config/build'
 
@@ -96,10 +96,10 @@ export async function buildMDX(
     let processor = cache.get(key)
 
     if (!processor) {
-      // const postprocessOptions: PostprocessOptions = {
-      //   _format: format,
-      //   // ...collection?.postprocess,
-      // }
+      const postprocessOptions: PostprocessOptions = {
+        _format: format,
+        // ...collection?.postprocess,
+      }
 
       processor = createProcessor({
         outputFormat: 'program',

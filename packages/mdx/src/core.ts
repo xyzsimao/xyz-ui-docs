@@ -38,6 +38,8 @@ export interface EmitOptions {
   write?: boolean
 }
 
+export type CompilationContext<Collection> = PluginContext &
+  TransformOptions<Collection>
 
 export interface EmitOutput {
   entries: EmitEntry[]
@@ -68,33 +70,33 @@ export interface Plugin extends IndexFilePlugin {
     server: ServerContext,
   ) => Awaitable<void>
 
-  // meta?: {
-  //   /**
-  //    * Transform metadata
-  //    */
-  //   transform?: (
-  //     this: CompilationContext<MetaCollectionItem>,
-  //     data: unknown,
-  //   ) => Awaitable<unknown | void>
-  // }
+  meta?: {
+    /**
+     * Transform metadata
+     */
+    transform?: (
+      this: CompilationContext<MetaCollectionItem>,
+      data: unknown,
+    ) => Awaitable<unknown | void>
+  }
 
-  // doc?: {
-  //   /**
-  //    * Transform frontmatter
-  //    */
-  //   frontmatter?: (
-  //     this: CompilationContext<DocCollectionItem>,
-  //     data: Record<string, unknown>,
-  //   ) => Awaitable<Record<string, unknown> | void>
+  doc?: {
+    /**
+     * Transform frontmatter
+     */
+    frontmatter?: (
+      this: CompilationContext<DocCollectionItem>,
+      data: Record<string, unknown>,
+    ) => Awaitable<Record<string, unknown> | void>
 
-  //   /**
-  //    * Transform `vfile` on compilation stage
-  //    */
-  //   vfile?: (
-  //     this: CompilationContext<DocCollectionItem>,
-  //     file: VFile,
-  //   ) => Awaitable<VFile | void>
-  // }
+    /**
+     * Transform `vfile` on compilation stage
+     */
+    vfile?: (
+      this: CompilationContext<DocCollectionItem>,
+      file: VFile,
+    ) => Awaitable<VFile | void>
+  }
 }
 
 export type PluginOption = Awaitable<
@@ -120,7 +122,7 @@ export interface CoreOptions {
   outDir: string
   plugins?: PluginOption[]
 
-    /**
+  /**
    * the workspace info if this instance is created as a workspace
    */
   workspace?: {
@@ -129,8 +131,6 @@ export interface CoreOptions {
     dir: string
   }
 }
-
-
 
 export const _Defaults = {
   configPath: 'source.config.ts',
@@ -151,10 +151,38 @@ async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
   return plugins
 }
 
+export interface TransformOptions<Collection> {
+  collection: Collection
+  filePath: string
+  source: string
+}
+
 export function createCore(options: CoreOptions) {
   let config: LoadedConfig
   let plugins: Plugin[]
   const workspaces = new Map<string, Core>()
+  async function transformMetadata<T>(
+    {
+      collection,
+      filePath,
+      source,
+    }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
+    data: unknown,
+  ): Promise<T> {
+    if (collection.schema) {
+      data = await validate(
+        collection.schema,
+        data,
+        { path: filePath, source },
+        collection.type === 'doc'
+          ? `invalid frontmatter in ${filePath}`
+          : `invalid data in ${filePath}`,
+      )
+    }
+
+    return data as T
+  }
+
   return {
     /**
      * Convenient cache store, reset when config changes
@@ -170,29 +198,32 @@ export function createCore(options: CoreOptions) {
         config.global.plugins,
       ])
 
-        for (const plugin of plugins) {
-          const out = await plugin.config?.call(this.getPluginContext(), config)
-          if (out) config = out
-        }
+      console.log('[mdx] plugins')
 
-        // only support workspaces with max depth 1
-        if (!options.workspace) {
-          await Promise.all(
-            Object.entries(config.workspaces).map(async ([name, workspace]) => {
-              const core = createCore({
-                ...options,
-                outDir: path.join(options.outDir, name),
-                workspace: {
-                  name,
-                  parent: this,
-                  dir: workspace.dir,
-                },
-              })
-              await core.init({ config: workspace.config })
-              workspaces.set(name, core)
+      for (const plugin of plugins) {
+        // console.log(plugin['index-file'])
+        const out = await plugin.config?.call(this.getPluginContext(), config)
+        if (out) config = out
+      }
+
+      // only support workspaces with max depth 1
+      if (!options.workspace) {
+        await Promise.all(
+          Object.entries(config.workspaces).map(async ([name, workspace]) => {
+            const core = createCore({
+              ...options,
+              outDir: path.join(options.outDir, name),
+              workspace: {
+                name,
+                parent: this,
+                dir: workspace.dir,
+              },
             })
-          )
-        }
+            await core.init({ config: workspace.config })
+            workspaces.set(name, core)
+          }),
+        )
+      }
     },
     getWorkspaces() {
       return workspaces
@@ -203,9 +234,9 @@ export function createCore(options: CoreOptions) {
     getConfig(): LoadedConfig {
       return config
     },
-    // /**
-    //  * The file path of compiled config file, the file may not exist (e.g. on Vite, or still compiling)
-    //  */
+    /**
+     * The file path of compiled config file, the file may not exist (e.g. on Vite, or still compiling)
+     */
     getCompiledConfigPath(): string {
       return path.join(options.outDir, 'source.config.mjs')
     },
@@ -280,59 +311,57 @@ export function createCore(options: CoreOptions) {
 
       return out
     },
-    // async transformMeta(
-    //   options: TransformOptions<MetaCollectionItem>,
-    //   data: unknown
-    // ): Promise<unknown> {
-    //   const ctx = {
-    //     ...this.getPluginContext(),
-    //     ...options,
-    //   }
+    async transformMeta(
+      options: TransformOptions<MetaCollectionItem>,
+      data: unknown,
+    ): Promise<unknown> {
+      const ctx = {
+        ...this.getPluginContext(),
+        ...options,
+      }
 
-    //   data = await transformMetadata(options, data)
-    //   for (const plugin of plugins) {
-    //     if (plugin.meta?.transform)
-    //       data = (await plugin.meta.transform.call(ctx, data)) ?? data
-    //   }
+      data = await transformMetadata(options, data)
+      for (const plugin of plugins) {
+        if (plugin.meta?.transform)
+          data = (await plugin.meta.transform.call(ctx, data)) ?? data
+      }
 
-    //   return data
-    // },
-    // async transformFrontmatter(
-    //   options: TransformOptions<DocCollectionItem>,
-    //   data: Record<string, unknown>
-    // ): Promise<Record<string, unknown>> {
-    //   const ctx = {
-    //     ...this.getPluginContext(),
-    //     ...options,
-    //   }
+      return data
+    },
+    async transformFrontmatter(
+      options: TransformOptions<DocCollectionItem>,
+      data: Record<string, unknown>,
+    ): Promise<Record<string, unknown>> {
+      const ctx = {
+        ...this.getPluginContext(),
+        ...options,
+      }
 
-    //   data = await transformMetadata(options, data)
-    //   for (const plugin of plugins) {
-    //     if (plugin.doc?.frontmatter)
-    //       data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data
-    //   }
+      data = await transformMetadata(options, data)
+      for (const plugin of plugins) {
+        if (plugin.doc?.frontmatter)
+          data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data
+      }
 
-    //   return data
-    // },
-    // async transformVFile(
-    //   options: TransformOptions<DocCollectionItem>,
-    //   file: VFile
-    // ): Promise<VFile> {
-    //   const ctx = {
-    //     ...this.getPluginContext(),
-    //     ...options,
-    //   }
+      return data
+    },
+    async transformVFile(
+      options: TransformOptions<DocCollectionItem>,
+      file: VFile,
+    ): Promise<VFile> {
+      const ctx = {
+        ...this.getPluginContext(),
+        ...options,
+      }
 
-    //   for (const plugin of plugins) {
-    //     if (plugin.doc?.vfile)
-    //       file = (await plugin.doc.vfile.call(ctx, file)) ?? file
-    //   }
+      for (const plugin of plugins) {
+        if (plugin.doc?.vfile)
+          file = (await plugin.doc.vfile.call(ctx, file)) ?? file
+      }
 
-    //   return file
-    // },
+      return file
+    },
   }
 }
-
-
 
 export type Core = ReturnType<typeof createCore>

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 // import { RemarkFeedbackBlockOptions } from 'xyzdocs-core/mdx-plugins'
 import {
-//   applyMdxPreset,
+  applyMdxPreset,
   defineCollections,
   defineConfig,
   defineDocs,
@@ -129,37 +129,37 @@ export const blog = defineCollections({
     date: z.iso.date().or(z.date()),
   }),
   async: true,
-//   async mdxOptions(environment) {
-//     const { rehypeCodeDefaultOptions } =
-//       await import('xyzdocs-core/mdx-plugins/rehype-code')
-//     const { remarkSteps } =
-//       await import('xyzdocs-core/mdx-plugins/remark-steps')
+  async mdxOptions(environment) {
+    const { rehypeCodeDefaultOptions } =
+      await import('xyzdocs-core/mdx-plugins/rehype-code')
+    const { remarkSteps } =
+      await import('xyzdocs-core/mdx-plugins/remark-steps')
 
-//     return applyMdxPreset({
-//       rehypeCodeOptions: {
-//         inline: 'tailing-curly-colon',
-//         themes: {
-//           // light: 'catppuccin-latte',
-//           // dark: 'catppuccin-mocha',
-//           light: 'one-light',
-//           dark: 'one-dark-pro',
-//         },
-//         transformers: [
-//           ...(rehypeCodeDefaultOptions.transformers ?? []),
-//           transformerEscape(),
-//         ],
-//       },
-//       remarkCodeTabOptions: {
-//         parseMdx: true,
-//       },
-//       remarkNpmOptions: {
-//         persist: {
-//           id: 'package-manager',
-//         },
-//       },
-//       remarkPlugins: [remarkSteps],
-//     })(environment)
-//   },
+    return applyMdxPreset({
+      // rehypeCodeOptions: {
+      //   inline: 'tailing-curly-colon',
+      //   themes: {
+      //     // light: 'catppuccin-latte',
+      //     // dark: 'catppuccin-mocha',
+      //     light: 'one-light',
+      //     dark: 'one-dark-pro',
+      //   },
+      //   transformers: [
+      //     ...(rehypeCodeDefaultOptions.transformers ?? []),
+      //     transformerEscape(),
+      //   ],
+      // },
+      // remarkCodeTabOptions: {
+      //   parseMdx: true,
+      // },
+      // remarkNpmOptions: {
+      //   persist: {
+      //     id: 'package-manager',
+      //   },
+      // },
+      // remarkPlugins: [remarkSteps],
+    })(environment)
+  },
 })
 
 

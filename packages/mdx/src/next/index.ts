@@ -1,11 +1,16 @@
-
-const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts']
-import { _Defaults, type Core, createCore } from '@/core'
 import type { NextConfig } from 'next'
-import type { IndexFilePluginOptions } from '@/plugins/index-file'
+import type { Configuration } from 'webpack'
+import type { WebpackLoaderOptions } from '@/webpack'
+import type {
+  TurbopackLoaderOptions,
+  TurbopackOptions,
+} from 'next/dist/server/config-shared'
+import * as path from 'node:path'
 import { loadConfig } from '@/config/load-from-file'
-import path from 'path'
-
+import { _Defaults, type Core, createCore } from '@/core'
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders'
+import type { IndexFilePluginOptions } from '@/plugins/index-file'
+import indexFile from '@/plugins/index-file'
 export interface CreateMDXOptions {
   /**
    * Path to source configuration file
@@ -30,44 +35,120 @@ function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
   }
 }
 
+const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts']
+
+// 这里是next的入口函数
 export function createMDX(createOptions: CreateMDXOptions = {}) {
-  return (nextConfig: NextConfig = {}): NextConfig => {
- 
   const core = createNextCore(applyDefaults(createOptions))
-   const isDev = process.env.NODE_ENV === 'development'
+  const isDev = process.env.NODE_ENV === 'development'
 
   if (process.env._XYZDOCS_MDX !== '1') {
     process.env._XYZDOCS_MDX = '1'
-    console.log("createMDX init")
+    console.log('createMDX init')
     void init(isDev, core)
   }
+  // 这里是关键 构造一些东西 传递给next框架： 比如自定义 loader
+  return (nextConfig: NextConfig = {}): NextConfig => {
+    const { configPath, outDir } = core.getOptions()
+    const loaderOptions: WebpackLoaderOptions = {
+      configPath,
+      outDir,
+      absoluteCompiledConfigPath: path.resolve(core.getCompiledConfigPath()),
+      isDev,
+    }
+
+    const turbopack: TurbopackOptions = {
+      ...nextConfig.turbopack,
+      rules: {
+        ...nextConfig.turbopack?.rules,
+        '*.{md,mdx}': {
+          loaders: [
+            {
+              loader: 'xyzdocs-mdx/loader-mdx',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.js',
+        },
+        '*.json': {
+          loaders: [
+            {
+              loader: 'xyzdocs-mdx/loader-meta',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.json',
+        },
+        '*.yaml': {
+          loaders: [
+            {
+              loader: 'xyzdocs-mdx/loader-meta',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.js',
+        },
+      },
+    }
 
     return {
       ...nextConfig,
+      turbopack,
+      pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
+      webpack: (config: Configuration, options) => {
+        config.resolve ||= {}
 
+        config.module ||= {}
+        config.module.rules ||= []
+
+        config.module.rules.push(
+          {
+            test: mdxLoaderGlob,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'xyzdocs-mdx/loader-mdx',
+                options: loaderOptions,
+              },
+            ],
+          },
+          {
+            test: metaLoaderGlob,
+            enforce: 'pre',
+            use: [
+              {
+                loader: 'xyzdocs-mdx/loader-meta',
+                options: loaderOptions,
+              },
+            ],
+          },
+        )
+
+        config.plugins ||= []
+
+        return nextConfig.webpack?.(config, options) ?? config
+      },
     }
   }
 }
-
 
 function createNextCore(options: Required<CreateMDXOptions>): Core {
   return createCore({
     environment: 'next',
     outDir: options.outDir,
     configPath: options.configPath,
-    // plugins: [options.index && indexFile(options.index)],
+    plugins: [options.index && indexFile(options.index)],
   })
 }
 
 export async function postInstall(options: CreateMDXOptions) {
-  const core = createNextCore(applyDefaults(options))
-  console.log("core created")
-  await core.init({
-    config: loadConfig(core, true),
-  })
+  // const core = createNextCore(applyDefaults(options))
+  // console.log('core created')
+  // await core.init({
+  //   config: loadConfig(core, true),
+  // })
   // await core.emit({ write: true })
 }
-
 
 async function init(dev: boolean, core: Core): Promise<void> {
   async function initOrReload() {
@@ -78,7 +159,7 @@ async function init(dev: boolean, core: Core): Promise<void> {
   }
 
   async function devServer() {
-    console.log("devServer start")
+    console.log('devServer start')
     const { FSWatcher } = await import('chokidar')
     const { configPath, outDir } = core.getOptions()
     const watcher = new FSWatcher({

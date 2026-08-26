@@ -87,23 +87,23 @@ export function useParams() {
   return use(FrameworkContext).useParams()
 }
 
-// export function Image(props: ImageProps) {
-//   const { Image } = use(FrameworkContext)
-//   if (!Image) {
-//     const { src, alt, priority, ...rest } = props
+export function Image(props: ImageProps) {
+  const { Image } = use(FrameworkContext)
+  if (!Image) {
+    const { src, alt, priority, ...rest } = props
 
-//     return (
-//       <img
-//         alt={alt}
-//         src={src as string}
-//         fetchPriority={priority ? 'high' : 'auto'}
-//         {...rest}
-//       />
-//     )
-//   }
+    return (
+      <img
+        alt={alt}
+        src={src as string}
+        fetchPriority={priority ? 'high' : 'auto'}
+        {...rest}
+      />
+    )
+  }
 
-//   return <Image {...props} />
-// }
+  return <Image {...props} />
+}
 
 export function Link(props: LinkProps) {
   const { Link } = use(FrameworkContext)
