@@ -16,10 +16,10 @@ export type xyzdocsPresetOptions = Omit<
   rehypePlugins?: ResolvePlugins
 
   remarkHeadingOptions?: Plugins.RemarkHeadingOptions | false
-  rehypeCodeOptions?: Plugins.RehypeCodeOptions | false
-  rehypeTocOptions?: Plugins.RehypeTocOptions | false
-  remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false
-  remarkNpmOptions?: Plugins.RemarkNpmOptions | false
+  // rehypeCodeOptions?: Plugins.RehypeCodeOptions | false
+  // rehypeTocOptions?: Plugins.RehypeTocOptions | false
+  // remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false
+  // remarkNpmOptions?: Plugins.RemarkNpmOptions | false
 
   /**
    * The directory to find image sizes
@@ -155,27 +155,27 @@ export async function compileMDX<
 
 function getCompileOptions({
   preset: _,
-  rehypeCodeOptions,
-  remarkImageOptions,
-  rehypeTocOptions,
+  // rehypeCodeOptions,
+  // remarkImageOptions,
+  // rehypeTocOptions,
   remarkHeadingOptions,
-  remarkCodeTabOptions,
-  remarkNpmOptions,
+  // remarkCodeTabOptions,
+  // remarkNpmOptions,
   imageDir = './public',
   ...options
 }: xyzdocsPresetOptions = {}): CompileOptions {
   function getPlugin<K extends keyof typeof Plugins>(
-    name: K
+    name: K,
   ): (typeof Plugins)[K] | null {
     return name in Plugins ? Plugins[name] : null
   }
   const remarkGfm = getPlugin('remarkGfm')
   const remarkHeading = getPlugin('remarkHeading')
-  const remarkCodeTab = getPlugin('remarkCodeTab')
-  const remarkNpm = getPlugin('remarkNpm')
-  const remarkImage = getPlugin('remarkImage')
-  const rehypeCode = getPlugin('rehypeCode')
-  const rehypeToc = getPlugin('rehypeToc')
+  // const remarkCodeTab = getPlugin('remarkCodeTab')
+  // const remarkNpm = getPlugin('remarkNpm')
+  // const remarkImage = getPlugin('remarkImage')
+  // const rehypeCode = getPlugin('rehypeCode')
+  // const rehypeToc = getPlugin('rehypeToc')
 
   return {
     ...options,
@@ -186,37 +186,37 @@ function getCompileOptions({
         remarkHeading && remarkHeadingOptions !== false
           ? [remarkHeading, remarkHeadingOptions]
           : null,
-        remarkImage && remarkImageOptions !== false
-          ? [
-              remarkImage,
-              {
-                useImport: false,
-                publicDir: imageDir,
-                ...remarkImageOptions,
-              } satisfies Plugins.RemarkImageOptions,
-            ]
-          : null,
-        remarkCodeTab && remarkCodeTabOptions !== false
-          ? [remarkCodeTab, remarkCodeTabOptions]
-          : null,
-        remarkNpm && remarkNpmOptions !== false
-          ? [remarkNpm, remarkNpmOptions]
-          : null,
+        // remarkImage && remarkImageOptions !== false
+        //   ? [
+        //       remarkImage,
+        //       {
+        //         useImport: false,
+        //         publicDir: imageDir,
+        //         ...remarkImageOptions,
+        //       } satisfies Plugins.RemarkImageOptions,
+        //     ]
+        //   : null,
+        // remarkCodeTab && remarkCodeTabOptions !== false
+        //   ? [remarkCodeTab, remarkCodeTabOptions]
+        //   : null,
+        // remarkNpm && remarkNpmOptions !== false
+        //   ? [remarkNpm, remarkNpmOptions]
+        //   : null,
         ...v,
       ],
-      options.remarkPlugins
+      options.remarkPlugins,
     ),
     rehypePlugins: pluginOption(
       (v) => [
-        rehypeCode && rehypeCodeOptions !== false
-          ? [rehypeCode, rehypeCodeOptions]
-          : null,
-        rehypeToc && rehypeTocOptions !== false
-          ? [rehypeToc, rehypeTocOptions]
-          : null,
+        // rehypeCode && rehypeCodeOptions !== false
+        //   ? [rehypeCode, rehypeCodeOptions]
+        //   : null,
+        // rehypeToc && rehypeTocOptions !== false
+        //   ? [rehypeToc, rehypeTocOptions]
+        //   : null,
         ...v,
       ],
-      options.rehypePlugins
+      options.rehypePlugins,
     ),
   }
 }

@@ -5,6 +5,11 @@
   "private": true,
   "description": "A simple example library built by tsdown",
   "exports": {
+    "./mdx": {
+      "types": "./dist/mdx.d.ts",
+      "node": "./dist/mdx.server.js",
+      "import": "./dist/mdx.js"
+    },
     "./provider/*": {
       "types": "./dist/provider/*.d.ts",
       "import": "./dist/provider/*.js"
@@ -63,7 +68,7 @@
     "next": "16.1.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.0.0",
+    "tailwindcss": "^4.1.18",
     "xyzdocs-core": "workspace:*"
   },
   "peerDependenciesMeta": {

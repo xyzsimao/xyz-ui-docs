@@ -145,6 +145,7 @@ export type WebpackLoader = (
  */
 export function toWebpack(loader: Loader): WebpackLoader {
   return async function (source, callback) {
+    console.log('toWebpack')
     try {
       const result = await loader.load({
         filePath: this.resourcePath,
@@ -162,12 +163,12 @@ export function toWebpack(loader: Loader): WebpackLoader {
         callback(undefined, result.code, result.map as string)
       }
     } catch (error) {
-      // if (error instanceof ValidationError) {
-      //   return callback(new Error(await error.toStringFormatted()))
-      // }
+      if (error instanceof ValidationError) {
+        return callback(new Error(await error.toStringFormatted()))
+      }
 
-      // if (!(error instanceof Error)) throw error
-      // callback(error)
+      if (!(error instanceof Error)) throw error
+      callback(error)
     }
   }
 }

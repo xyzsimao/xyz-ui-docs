@@ -4,6 +4,9 @@ import { source } from '@/lib/source'
 import { Metadata } from 'next'
 
 import { createMetadata, getPageImage } from '@/lib/metadata'
+import { getMDXComponents } from '@/mdx-components'
+
+import { createCompiler } from '@xyzdocs/mdx-remote'
 // import { getLLMText, source } from '@/lib/source'
 
 // import { Feedback, FeedbackBlock } from '@/components/feedback/client'
@@ -43,11 +46,10 @@ import { createMetadata, getPageImage } from '@/lib/metadata'
 // }
 
 export const revalidate = false
-
+const compiler = createCompiler({
+  // options
+})
 export default async function Page(props: PageProps<'/docs/[...slug]'>) {
-  const params = await props.params
-  const page = source.getPage(params.slug)
-
   // if (!page)
   //   return (
   //     <NotFound
@@ -70,203 +72,225 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   //   )
   // }
   // console.log(page)
-  const { body: Mdx, toc } = await page.data
+  // const { body: Mdx, toc } = await page.data.load()
   // const markdown = await getLLMText(page)
-  return (
-    <div>
-        <Mdx />
-    </div>
-    // <DocsPage
-    //   toc={toc}
-    //   tableOfContent={{
-    //     style: 'clerk',
-    //     footer: (
-    //       <div className="my-3 space-y-3">
-    //         <Separator />
-    //         <EditSource path={page.path} />
-    //         <ScrollTop />
-    //         {/* <Feedback /> */}
-    //         <CopyPage text={markdown} />
-    //         {/* <AskAI href={page.url} />
-    //         <OpenInChat href={page.url} /> */}
-    //       </div>
-    //     ),
-    //   }}
-    // >
-    //   <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
-    //   <p className="text-lg text-fd-muted-foreground mb-2">
-    //     {page.data.description}
-    //   </p>
-    //   {/* <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
-    //     <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
-    //     <ViewOptions
-    //       markdownUrl={`${page.url}.mdx`}
-    //       githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
-    //     />
-    //   </div> */}
-    //   <div className="prose flex-1 text-fd-foreground/90">
-    //     {/* {page.data.preview && <PreviewRenderer preview={page.data.preview} />} */}
-    //     <Mdx
-    //       components={getMDXComponents({
-    //         components: {
-    //           ComponentPreview,
-    //           DemoLiveEditor,
-    //           a: ({ href, ...props }) => {
-    //             const found = source.getPageByHref(href ?? '', {
-    //               dir: PathUtils.dirname(page.path),
-    //             })
+  const params = await props.params
+  const page = source.getPage(params.slug)
 
-    //             if (!found) return <Link href={href} {...props} />
+  const { body: Mdx, toc } = await page.data.load()
 
-    //             return (
-    //               <HoverCard>
-    //                 <HoverCardTrigger
-    //                   href={
-    //                     found.hash
-    //                       ? `${found.page.url}#${found.hash}`
-    //                       : found.page.url
-    //                   }
-    //                   {...props}
-    //                 >
-    //                   {props.children}
-    //                 </HoverCardTrigger>
-    //                 <HoverCardContent className="text-sm">
-    //                   <p className="font-medium">{found.page.data.title}</p>
-    //                   <p className="text-fd-muted-foreground">
-    //                     {found.page.data.description}
-    //                   </p>
-    //                 </HoverCardContent>
-    //               </HoverCard>
-    //             )
-    //           },
-    //           DocsCategory: ({ url }) => {
-    //             return <DocsCategory url={url ?? page.url} />
-    //           },
-    //           // Example,
-    //           // ...Twoslash,
-    //           // a: ({ href, ...props }) => {
-    //           //   const found = source.getPageByHref(href ?? '', {
-    //           //     dir: PathUtils.dirname(page.path),
-    //           //   })
-    //           //   if (!found) return <Link href={href} {...props} />
-    //           //   return (
-    //           //     <HoverCard>
-    //           //       <HoverCardTrigger
-    //           //         href={
-    //           //           found.hash
-    //           //             ? `${found.page.url}#${found.hash}`
-    //           //             : found.page.url
-    //           //         }
-    //           //         {...props}
-    //           //       >
-    //           //         {props.children}
-    //           //       </HoverCardTrigger>
-    //           //       <HoverCardContent className="text-sm">
-    //           //         <p className="font-medium">{found.page.data.title}</p>
-    //           //         <p className="text-fd-muted-foreground">
-    //           //           {found.page.data.description}
-    //           //         </p>
-    //           //       </HoverCardContent>
-    //           //     </HoverCard>
-    //           //   )
-    //           // },
-    //           // FeedbackBlock: ({ children, ...props }) => (
-    //           //   <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
-    //           //     {children}
-    //           //   </FeedbackBlock>
-    //           // ),
-    //           // Banner,
-    //           // Mermaid,
-    //           // TypeTable,
-    //           // Wrapper,
-    //           // blockquote: Callout as unknown as FC<
-    //           //   ComponentProps<'blockquote'>
-    //           // >,
-    //           // DocsCategory: ({ url }) => {
-    //           //   return <DocsCategory url={url ?? page.url} />
-    //           // },
-    //           // Installation,
-    //           // Customisation,
-    //           // Add your custom components here
-    //         },
-    //         isBlog: false,
-    //       })}
-    //       // components={getMDXComponents({
-    //       //   Example,
-    //       //   ...Twoslash,
-    //       //   a: ({ href, ...props }) => {
-    //       //     const found = source.getPageByHref(href ?? '', {
-    //       //       dir: PathUtils.dirname(page.path),
-    //       //     })
+  // const compiled = await compiler.compile({
+  //   source: await page.data.getText('raw'),
+  // })
 
-    //       //     if (!found) return <Link href={href} {...props} />
+  // const MdxContent = compiled.body
 
-    //       //     return (
-    //       //       <HoverCard>
-    //       //         <HoverCardTrigger
-    //       //           href={
-    //       //             found.hash
-    //       //               ? `${found.page.url}#${found.hash}`
-    //       //               : found.page.url
-    //       //           }
-    //       //           {...props}
-    //       //         >
-    //       //           {props.children}
-    //       //         </HoverCardTrigger>
-    //       //         <HoverCardContent className="text-sm">
-    //       //           <p className="font-medium">{found.page.data.title}</p>
-    //       //           <p className="text-fd-muted-foreground">
-    //       //             {found.page.data.description}
-    //       //           </p>
-    //       //         </HoverCardContent>
-    //       //       </HoverCard>
-    //       //     )
-    //       //   },
-    //       //   FeedbackBlock: ({ children, ...props }) => (
-    //       //     <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
-    //       //       {children}
-    //       //     </FeedbackBlock>
-    //       //   ),
-    //       //   Banner,
-    //       //   Mermaid,
-    //       //   TypeTable,
-    //       //   Wrapper,
-    //       //   blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
+  if (!page) {
+  } else {
+    console.log(page.data)
+    return (
+      <div>
+        {page.data.title}
+        {page.data.description}
+        <div className="prose flex-1 text-fd-foreground/90">
+          <Mdx components={getMDXComponents({})} />
+        </div>
 
-    //       //   Installation,
-    //       //   Customisation,
-    //       // })}
-    //     />
-    //     {page.data.index ? <DocsCategory url={page.url} /> : null}
-    //   </div>
-    //   <Feedback onSendAction={onPageFeedbackAction} />
-    //   {lastModified && <PageLastUpdate date={lastModified} />}
-    // </DocsPage>
-  )
+        {/* <MdxContent components={getMDXComponents({})} /> */}
+      </div>
+    )
+  }
+
+  // <DocsPage
+  //   toc={toc}
+  //   tableOfContent={{
+  //     style: 'clerk',
+  //     footer: (
+  //       <div className="my-3 space-y-3">
+  //         <Separator />
+  //         <EditSource path={page.path} />
+  //         <ScrollTop />
+  //         {/* <Feedback /> */}
+  //         <CopyPage text={markdown} />
+  //         {/* <AskAI href={page.url} />
+  //         <OpenInChat href={page.url} /> */}
+  //       </div>
+  //     ),
+  //   }}
+  // >
+  //   <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+  //   <p className="text-lg text-fd-muted-foreground mb-2">
+  //     {page.data.description}
+  //   </p>
+  //   {/* <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
+  //     <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+  //     <ViewOptions
+  //       markdownUrl={`${page.url}.mdx`}
+  //       githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+  //     />
+  //   </div> */}
+  //   <div className="prose flex-1 text-fd-foreground/90">
+  //     {/* {page.data.preview && <PreviewRenderer preview={page.data.preview} />} */}
+  //     <Mdx
+  //       components={getMDXComponents({
+  //         components: {
+  //           ComponentPreview,
+  //           DemoLiveEditor,
+  //           a: ({ href, ...props }) => {
+  //             const found = source.getPageByHref(href ?? '', {
+  //               dir: PathUtils.dirname(page.path),
+  //             })
+
+  //             if (!found) return <Link href={href} {...props} />
+
+  //             return (
+  //               <HoverCard>
+  //                 <HoverCardTrigger
+  //                   href={
+  //                     found.hash
+  //                       ? `${found.page.url}#${found.hash}`
+  //                       : found.page.url
+  //                   }
+  //                   {...props}
+  //                 >
+  //                   {props.children}
+  //                 </HoverCardTrigger>
+  //                 <HoverCardContent className="text-sm">
+  //                   <p className="font-medium">{found.page.data.title}</p>
+  //                   <p className="text-fd-muted-foreground">
+  //                     {found.page.data.description}
+  //                   </p>
+  //                 </HoverCardContent>
+  //               </HoverCard>
+  //             )
+  //           },
+  //           DocsCategory: ({ url }) => {
+  //             return <DocsCategory url={url ?? page.url} />
+  //           },
+  //           // Example,
+  //           // ...Twoslash,
+  //           // a: ({ href, ...props }) => {
+  //           //   const found = source.getPageByHref(href ?? '', {
+  //           //     dir: PathUtils.dirname(page.path),
+  //           //   })
+  //           //   if (!found) return <Link href={href} {...props} />
+  //           //   return (
+  //           //     <HoverCard>
+  //           //       <HoverCardTrigger
+  //           //         href={
+  //           //           found.hash
+  //           //             ? `${found.page.url}#${found.hash}`
+  //           //             : found.page.url
+  //           //         }
+  //           //         {...props}
+  //           //       >
+  //           //         {props.children}
+  //           //       </HoverCardTrigger>
+  //           //       <HoverCardContent className="text-sm">
+  //           //         <p className="font-medium">{found.page.data.title}</p>
+  //           //         <p className="text-fd-muted-foreground">
+  //           //           {found.page.data.description}
+  //           //         </p>
+  //           //       </HoverCardContent>
+  //           //     </HoverCard>
+  //           //   )
+  //           // },
+  //           // FeedbackBlock: ({ children, ...props }) => (
+  //           //   <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
+  //           //     {children}
+  //           //   </FeedbackBlock>
+  //           // ),
+  //           // Banner,
+  //           // Mermaid,
+  //           // TypeTable,
+  //           // Wrapper,
+  //           // blockquote: Callout as unknown as FC<
+  //           //   ComponentProps<'blockquote'>
+  //           // >,
+  //           // DocsCategory: ({ url }) => {
+  //           //   return <DocsCategory url={url ?? page.url} />
+  //           // },
+  //           // Installation,
+  //           // Customisation,
+  //           // Add your custom components here
+  //         },
+  //         isBlog: false,
+  //       })}
+  //       // components={getMDXComponents({
+  //       //   Example,
+  //       //   ...Twoslash,
+  //       //   a: ({ href, ...props }) => {
+  //       //     const found = source.getPageByHref(href ?? '', {
+  //       //       dir: PathUtils.dirname(page.path),
+  //       //     })
+
+  //       //     if (!found) return <Link href={href} {...props} />
+
+  //       //     return (
+  //       //       <HoverCard>
+  //       //         <HoverCardTrigger
+  //       //           href={
+  //       //             found.hash
+  //       //               ? `${found.page.url}#${found.hash}`
+  //       //               : found.page.url
+  //       //           }
+  //       //           {...props}
+  //       //         >
+  //       //           {props.children}
+  //       //         </HoverCardTrigger>
+  //       //         <HoverCardContent className="text-sm">
+  //       //           <p className="font-medium">{found.page.data.title}</p>
+  //       //           <p className="text-fd-muted-foreground">
+  //       //             {found.page.data.description}
+  //       //           </p>
+  //       //         </HoverCardContent>
+  //       //       </HoverCard>
+  //       //     )
+  //       //   },
+  //       //   FeedbackBlock: ({ children, ...props }) => (
+  //       //     <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
+  //       //       {children}
+  //       //     </FeedbackBlock>
+  //       //   ),
+  //       //   Banner,
+  //       //   Mermaid,
+  //       //   TypeTable,
+  //       //   Wrapper,
+  //       //   blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
+
+  //       //   Installation,
+  //       //   Customisation,
+  //       // })}
+  //     />
+  //     {page.data.index ? <DocsCategory url={page.url} /> : null}
+  //   </div>
+  //   <Feedback onSendAction={onPageFeedbackAction} />
+  //   {lastModified && <PageLastUpdate date={lastModified} />}
+  // </DocsPage>
 }
 
-function DocsCategory({ url }: { url: string }) {
-  return (
-    <Cards>
-      {findSiblings(source.getPageTree(), url).map((item) => {
-        if (item.type === 'separator') return
-        if (item.type === 'folder') {
-          if (!item.index) return
-          item = item.index
-        }
+// function DocsCategory({ url }: { url: string }) {
+//   return (
+//     <Cards>
+//       {findSiblings(source.getPageTree(), url).map((item) => {
+//         if (item.type === 'separator') return
+//         if (item.type === 'folder') {
+//           if (!item.index) return
+//           item = item.index
+//         }
 
-        return (
-          <Card key={item.url} title={item.name} href={item.url}>
-            {item.description}
-          </Card>
-        )
-      })}
-    </Cards>
-  )
-}
+//         return (
+//           <Card key={item.url} title={item.name} href={item.url}>
+//             {item.description}
+//           </Card>
+//         )
+//       })}
+//     </Cards>
+//   )
+// }
 
 export async function generateMetadata(
-  props: PageProps<'/docs/[...slug]'>
+  props: PageProps<'/docs/[...slug]'>,
 ): Promise<Metadata> {
   const { slug = [] } = await props.params
   const page = source.getPage(slug)

@@ -1,9 +1,9 @@
 {
   "extends": "typescript-config/nextjs.json",
   "compilerOptions": {
+    "strictNullChecks": false,
     "jsx": "react-jsx",
-      "baseUrl": ".",
-      "ignoreDeprecations": "6.0",
+      "baseUrl": "./",
     "paths": {
       "react": [
         "./node_modules/@types/react"
@@ -20,7 +20,6 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",

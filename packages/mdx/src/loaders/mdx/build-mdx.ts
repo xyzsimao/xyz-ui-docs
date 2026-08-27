@@ -98,7 +98,7 @@ export async function buildMDX(
     if (!processor) {
       const postprocessOptions: PostprocessOptions = {
         _format: format,
-        // ...collection?.postprocess,
+        ...collection?.postprocess,
       }
 
       processor = createProcessor({
@@ -108,7 +108,7 @@ export async function buildMDX(
         remarkPlugins: [
           remarkInclude,
           ...(mdxOptions.remarkPlugins ?? []),
-          // [remarkPostprocess, postprocessOptions],
+          [remarkPostprocess, postprocessOptions],
         ],
         format,
       })
@@ -126,9 +126,9 @@ export async function buildMDX(
     data: { frontmatter, _compiler, _getProcessor: getProcessor },
   })
 
-  // if (collection) {
-  //   vfile = await core.transformVFile({ collection, filePath, source }, vfile)
-  // }
+  if (collection) {
+    vfile = await core.transformVFile({ collection, filePath, source }, vfile)
+  }
 
   return getProcessor(filePath.endsWith('.mdx') ? 'mdx' : 'md').process(vfile)
 }

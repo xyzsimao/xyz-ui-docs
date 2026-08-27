@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+
+
+@import './vitepress.css';
 @import './neutral.css';
 @import './preset.css';
 @import './shadcn.css';
@@ -7,3 +10,5 @@
     @apply flex flex-col min-h-screen;
   }
 }
+
+@import '@xyzdocs/ui_base/css/base.css'

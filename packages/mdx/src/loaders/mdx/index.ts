@@ -32,6 +32,8 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       compiler,
       filePath,
     }) {
+      console.log(' createMdxLoader callback method')
+
       let core = await getCore()
       const value = await getSource()
       const matter = xyzMatter(value)

@@ -92,20 +92,20 @@ export function createMetaLoader(
         }
       }
     },
-    bun: {
-      load(source, input) {
-        const result = onMeta(source, input)
-        if (result === null)
-          return {
-            loader: 'object',
-            exports: parse(input.filePath, source),
-          }
+    // bun: {
+    //   load(source, input) {
+    //     const result = onMeta(source, input)
+    //     if (result === null)
+    //       return {
+    //         loader: 'object',
+    //         exports: parse(input.filePath, source),
+    //       }
 
-        return result().then((data) => ({
-          loader: 'object',
-          exports: { default: data },
-        }))
-      },
-    },
+    //     return result().then((data) => ({
+    //       loader: 'object',
+    //       exports: { default: data },
+    //     }))
+    //   },
+    // },
   }
 }

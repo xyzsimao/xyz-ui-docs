@@ -1,6 +1,6 @@
 import type { ProcessorOptions } from '@mdx-js/mdx'
 import type { Pluggable } from 'unified'
-// import type * as Plugins from 'xyzdocs-core/mdx-plugins'
+import type * as Plugins from 'xyzdocs-core/mdx-plugins'
 import type { BuildEnvironment } from './build'
 
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[])
@@ -17,12 +17,12 @@ export type DefaultMDXOptions = Omit<
    */
   valueToExport?: string[]
 
-//   remarkStructureOptions?: Plugins.StructureOptions | false
-//   remarkHeadingOptions?: Plugins.RemarkHeadingOptions
-//   remarkImageOptions?: Plugins.RemarkImageOptions | false
-//   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false
-//   remarkNpmOptions?: Plugins.RemarkNpmOptions | false
-//   rehypeCodeOptions?: Plugins.RehypeCodeOptions | false
+  //   remarkStructureOptions?: Plugins.StructureOptions | false
+  remarkHeadingOptions?: Plugins.RemarkHeadingOptions
+  //   remarkImageOptions?: Plugins.RemarkImageOptions | false
+  //   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false
+  //   remarkNpmOptions?: Plugins.RemarkNpmOptions | false
+  //   rehypeCodeOptions?: Plugins.RehypeCodeOptions | false
 }
 
 
@@ -61,7 +61,7 @@ export function applyMdxPreset(
       valueToExport = [],
       // rehypeCodeOptions,
       // remarkImageOptions,
-      // remarkHeadingOptions,
+      remarkHeadingOptions,
       // remarkStructureOptions,
       // remarkCodeTabOptions,
       // remarkNpmOptions,
@@ -71,13 +71,13 @@ export function applyMdxPreset(
     const remarkPlugins = pluginOption(
       (v) => [
         plugins.remarkGfm,
-        // [
-        //   plugins.remarkHeading,
-        //   {
-        //     generateToc: false,
-        //     ...remarkHeadingOptions,
-        //   },
-        // ],
+        [
+          plugins.remarkHeading,
+          {
+            generateToc: false,
+            ...remarkHeadingOptions,
+          },
+        ],
         // remarkImageOptions !== false && [
         //   plugins.remarkImage,
         //   {
@@ -101,23 +101,23 @@ export function applyMdxPreset(
         //     ...remarkStructureOptions,
         //   } satisfies Plugins.StructureOptions,
         // ],
-        valueToExport.length > 0 &&
-          (() => {
-            return (_, file) => {
-              file.data['mdx-export'] ??= []
+        // valueToExport.length > 0 &&
+        //   (() => {
+        //     return (_, file) => {
+        //       file.data['mdx-export'] ??= []
 
-              for (const name of valueToExport) {
-                if (!(name in file.data)) continue
+        //       for (const name of valueToExport) {
+        //         if (!(name in file.data)) continue
 
-                file.data['mdx-export'].push({
-                  name,
-                  value: file.data[name],
-                })
-              }
-            }
-          }),
+        //         file.data['mdx-export'].push({
+        //           name,
+        //           value: file.data[name],
+        //         })
+        //       }
+        //     }
+        //   }),
       ],
-      mdxOptions.remarkPlugins
+      mdxOptions.remarkPlugins,
     )
 
     const rehypePlugins = pluginOption(

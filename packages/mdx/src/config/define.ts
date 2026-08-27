@@ -5,6 +5,7 @@ import { metaSchema, pageSchema } from 'xyzdocs-core/source/schema'
 // import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess'
 import type { PluginOption } from '@/core'
 import type { BuildEnvironment } from './build'
+import { PostprocessOptions } from '@/loaders/mdx/remark-postprocess'
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -39,7 +40,7 @@ export interface DocCollection<
 > extends BaseCollection {
   type: 'doc'
 
-  // postprocess?: Partial<PostprocessOptions>
+  postprocess?: Partial<PostprocessOptions>
   mdxOptions?:
     | ProcessorOptions
     | ((environment: BuildEnvironment) => Promise<ProcessorOptions>)

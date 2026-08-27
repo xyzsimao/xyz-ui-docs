@@ -188,7 +188,7 @@ function createPageIndexer({ url }: ResolvedLoaderConfig) {
     scan(storage: ContentStorage, lang?: string) {
       for (const filePath of storage.getFiles()) {
         const item = storage.read(filePath)!
-        // console.log(item)
+        console.log(item)
         const prefix = lang ? `${lang}.` : '.'
         const path = prefix + filePath
 
@@ -318,8 +318,8 @@ export function loader(
     ? createContentStorageBuilder(loaderConfig).i18n()
     : createContentStorageBuilder(loaderConfig).single()
   const indexer = createPageIndexer(loaderConfig)
-  //   console.log(loaderConfig)
-  // console.log(indexer)
+    console.log(loaderConfig)
+    console.log(indexer)
   if (storage instanceof FileSystem) {
     indexer.scan(storage)
   } else {
