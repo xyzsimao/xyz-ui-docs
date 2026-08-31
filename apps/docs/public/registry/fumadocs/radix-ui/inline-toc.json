@@ -1,0 +1,30 @@
+{
+  "name": "inline-toc",
+  "files": [
+    {
+      "type": "components",
+      "path": "components/inline-toc.tsx",
+      "content": "'use client';\n\nimport { ChevronDown } from 'lucide-react';\nimport type { TOCItemType } from 'fumadocs-core/toc';\nimport { Collapsible, CollapsibleContent, CollapsibleTrigger } from 'local:components/ui/collapsible.tsx';\nimport type { ComponentProps } from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { useTranslations } from '@fuma-translate/react';\n\nexport interface InlineTocProps extends ComponentProps<typeof Collapsible> {\n  items: TOCItemType[];\n}\n\nexport function InlineTOC({ items, ...props }: InlineTocProps) {\n  const t = useTranslations({ note: 'inline table of contents' });\n\n  return (\n    <Collapsible\n      {...props}\n      className={cn(\n        'not-prose rounded-lg border bg-fd-card text-fd-card-foreground',\n        props.className,\n      )}\n    >\n      <CollapsibleTrigger className=\"group inline-flex w-full items-center justify-between px-4 py-2.5 font-medium\">\n        {props.children ?? t('Table of Contents')}\n        <ChevronDown className=\"size-4 transition-transform duration-200 group-data-[state=open]:rotate-180\" />\n      </CollapsibleTrigger>\n      <CollapsibleContent>\n        <div className=\"flex flex-col p-4 pt-0 text-sm text-fd-muted-foreground\">\n          {items.map((item) => (\n            <a\n              key={item.url}\n              href={item.url}\n              className=\"border-s py-1.5 hover:text-fd-accent-foreground\"\n              style={{\n                paddingInlineStart: 12 * Math.max(item.depth - 1, 0),\n              }}\n            >\n              {item.title}\n            </a>\n          ))}\n        </div>\n      </CollapsibleContent>\n    </Collapsible>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "collapsible"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "@fuma-translate/react": "^1.0.2"
+  },
+  "devDependencies": {}
+}

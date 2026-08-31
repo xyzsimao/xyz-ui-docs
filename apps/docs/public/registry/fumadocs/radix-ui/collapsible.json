@@ -1,0 +1,24 @@
+{
+  "name": "collapsible",
+  "files": [
+    {
+      "type": "ui",
+      "path": "components/ui/collapsible.tsx",
+      "content": "'use client';\nimport * as Primitive from '@radix-ui/react-collapsible';\nimport * as React from 'react';\nimport { useEffect, useState } from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport const Collapsible = Primitive.Root;\n\nexport const CollapsibleTrigger = Primitive.CollapsibleTrigger;\n\nexport function CollapsibleContent({\n  children,\n  ...props\n}: React.ComponentProps<typeof Primitive.CollapsibleContent>) {\n  const [mounted, setMounted] = useState(false);\n\n  useEffect(() => {\n    setMounted(true);\n  }, []);\n\n  return (\n    <Primitive.CollapsibleContent\n      {...props}\n      className={cn(\n        'overflow-hidden',\n        mounted &&\n          'data-[state=closed]:animate-fd-collapsible-up data-[state=open]:animate-fd-collapsible-down',\n        props.className,\n      )}\n    >\n      {children}\n    </Primitive.CollapsibleContent>\n  );\n}\n\nexport type CollapsibleProps = Primitive.CollapsibleProps;\nexport type CollapsibleContentProps = Primitive.CollapsibleContentProps;\nexport type CollapsibleTriggerProps = Primitive.CollapsibleTriggerProps;\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "@radix-ui/react-collapsible": "^1.1.20"
+  },
+  "devDependencies": {}
+}

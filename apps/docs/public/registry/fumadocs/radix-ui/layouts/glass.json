@@ -1,0 +1,78 @@
+{
+  "name": "layouts/glass",
+  "files": [
+    {
+      "type": "layout",
+      "path": "layouts/glass/index.tsx",
+      "target": "<dir>/glass/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/glass"
+      },
+      "content": "'use client';\nimport type * as PageTree from 'fumadocs-core/page-tree';\nimport {\n  type BaseLayoutProps,\n  type BaseSlots,\n  type BaseSlotsProps,\n  baseSlots,\n  getLayoutTabs,\n  type GetLayoutTabsOptions,\n  type LayoutTab,\n  type LinkItemType,\n  useLinkItems,\n} from 'local:<dir>/shared/index.tsx';\nimport { TreeContextProvider } from 'fumadocs-ui/contexts/tree';\nimport { createContext, type FC, use, useMemo } from 'react';\nimport {\n  Sidebar,\n  SidebarDrawer,\n  SidebarProvider,\n  useSidebar,\n  type SidebarProps,\n  type SidebarProviderProps,\n  type SidebarDrawerProps,\n} from 'local:<dir>/glass/slots/sidebar.tsx';\nimport { Header, type HeaderProps } from 'local:<dir>/glass/slots/header.tsx';\n\nexport interface GlassSlots extends BaseSlots {\n  header: FC<HeaderProps>;\n  sidebar: {\n    main: FC<SidebarProps>;\n    provider: FC<SidebarProviderProps>;\n    use: typeof useSidebar;\n    drawer: FC<SidebarDrawerProps>;\n  };\n}\n\nexport interface GlassLayoutProps extends BaseLayoutProps {\n  tree: PageTree.Root;\n  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;\n  aiChat?: {\n    open: boolean;\n    onOpenChange: (v: boolean) => void;\n  };\n  slots?: Partial<GlassSlots>;\n  sidebar?: Omit<SidebarProviderProps, 'children'>;\n}\n\ninterface SlotsProps extends BaseSlotsProps<GlassLayoutProps> {\n  tabs: LayoutTab[];\n  aiChat?: GlassLayoutProps['aiChat'];\n}\n\nconst LayoutContext = createContext<{\n  props: SlotsProps;\n  navItems: LinkItemType[];\n  menuItems: LinkItemType[];\n  slots: GlassSlots;\n} | null>(null);\n\nexport function useGlassLayout() {\n  const context = use(LayoutContext);\n  if (!context)\n    throw new Error(\n      'Please use Glass layout components under <GlassLayout /> (`fumadocs-ui/layouts/glass`).',\n    );\n  return context;\n}\n\nconst { useBaseSlots } = baseSlots({\n  useProps() {\n    return useGlassLayout().props;\n  },\n});\n\nexport function GlassLayout(props: GlassLayoutProps) {\n  const { tree, tabs: defaultTabs, aiChat, children, slots: defaultSlots = {} } = props;\n  const linkItems = useLinkItems(props);\n  const { baseSlots, baseProps } = useBaseSlots(props);\n\n  const tabs = useMemo(() => {\n    if (Array.isArray(defaultTabs)) {\n      return defaultTabs;\n    }\n    if (typeof defaultTabs === 'object') {\n      return getLayoutTabs(tree, defaultTabs);\n    }\n    if (defaultTabs !== false) {\n      return getLayoutTabs(tree);\n    }\n    return [];\n  }, [tree, defaultTabs]);\n\n  const slots: GlassSlots = {\n    ...baseSlots,\n    header: defaultSlots.header ?? Header,\n    sidebar: defaultSlots.sidebar ?? {\n      drawer: SidebarDrawer,\n      main: Sidebar,\n      provider: SidebarProvider,\n      use: useSidebar,\n    },\n  };\n\n  const leftSpace = 'calc(50% - var(--fd-main-width)/2 - var(--fd-left-width))';\n  return (\n    <LayoutContext\n      value={{\n        props: {\n          tabs,\n          aiChat,\n          ...baseProps,\n        },\n        slots,\n        ...linkItems,\n      }}\n    >\n      <slots.sidebar.provider {...props.sidebar}>\n        <TreeContextProvider tree={tree}>\n          <div\n            id=\"fd-glass-layout\"\n            className=\"grid overflow-x-clip min-h-dvh [--fd-main-width:900px] [--fd-left-width:0px] [--fd-right-width:0px]\"\n            style={{\n              gridTemplate: `\"left left-margin main right-margin right\" 1fr / var(--fd-left-width) ${leftSpace} 1fr calc(50% - var(--fd-main-width)/2 - var(--fd-right-width) + min(${leftSpace}, 0px)) var(--fd-right-width)`,\n            }}\n          >\n            <slots.sidebar.drawer />\n            <slots.sidebar.main />\n            <slots.header />\n            {children}\n          </div>\n        </TreeContextProvider>\n      </slots.sidebar.provider>\n    </LayoutContext>\n  );\n}\n"
+    },
+    {
+      "type": "layout",
+      "path": "layouts/glass/page/index.tsx",
+      "target": "<dir>/glass/page/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/glass/page"
+      },
+      "content": "'use client';\nimport { type ComponentProps, createContext, use, useEffect, useState } from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { useTranslations } from '@fuma-translate/react';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { Edit } from 'lucide-react';\nimport { Footer } from 'local:<dir>/glass/page/slots/footer.tsx';\nimport { Breadcrumb } from 'local:<dir>/glass/page/slots/breadcrumb.tsx';\nimport { TOC, type TOCProps, TOCProvider } from 'local:<dir>/glass/page/slots/toc.tsx';\nimport { TOCItemType } from 'fumadocs-core/toc';\n\nexport interface DocsPageProps extends ComponentProps<'article'> {\n  toc?: TOCItemType[];\n\n  /**\n   * Extend the page to fill all available space\n   *\n   * @defaultValue false\n   */\n  full?: boolean | undefined;\n\n  tableOfContent?: TOCProps;\n}\n\nconst PageContext = createContext<{\n  full: boolean;\n} | null>(null);\n\nexport function useDocsPage() {\n  const context = use(PageContext);\n  if (!context)\n    throw new Error(\n      'Please use page components under <DocsPage /> (`fumadocs-ui/layouts/glass/page`).',\n    );\n  return context;\n}\n\nconst Empty: never[] = [];\n\nexport function DocsPage({ full = false, toc = Empty, tableOfContent, children }: DocsPageProps) {\n  return (\n    <PageContext\n      value={{\n        full,\n      }}\n    >\n      <TOCProvider toc={toc}>\n        <div\n          data-fd-full={full}\n          className={cn(\n            'flex flex-col gap-2 p-6 pb-16 min-w-0 [grid-area:main] md:pt-16 md:pb-8',\n            full && 'layout:[--fd-main-width:1200px]',\n          )}\n        >\n          <Breadcrumb />\n          {children}\n          <Footer />\n        </div>\n        <TOC {...tableOfContent} />\n      </TOCProvider>\n    </PageContext>\n  );\n}\n\nexport function EditOnGitHub(props: ComponentProps<'a'>) {\n  const t = useTranslations({ note: 'edit page' });\n\n  return (\n    <a\n      target=\"_blank\"\n      rel=\"noreferrer noopener\"\n      {...props}\n      className={cn(\n        buttonVariants({\n          color: 'secondary',\n          size: 'sm',\n        }),\n        'gap-1.5 not-prose',\n        props.className,\n      )}\n    >\n      {props.children ?? (\n        <>\n          <Edit className=\"size-3.5\" />\n          {t('Edit on GitHub')}\n        </>\n      )}\n    </a>\n  );\n}\n\n/**\n * Add typography styles\n */\nexport function DocsBody({ children, className, ...props }: ComponentProps<'div'>) {\n  return (\n    <div {...props} className={cn('prose flex-1', className)}>\n      {children}\n    </div>\n  );\n}\n\nexport function DocsDescription({ children, className, ...props }: ComponentProps<'p'>) {\n  // Don't render if no description provided\n  if (children === undefined) return null;\n\n  return (\n    <p {...props} className={cn('mb-8 text-lg text-fd-muted-foreground', className)}>\n      {children}\n    </p>\n  );\n}\n\nexport function DocsTitle({ children, className, ...props }: ComponentProps<'h1'>) {\n  return (\n    <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>\n      {children}\n    </h1>\n  );\n}\n\nexport function PageLastUpdate({\n  date: value,\n  ...props\n}: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {\n  const t = useTranslations({ note: 'page footer' });\n  const [date, setDate] = useState('');\n\n  useEffect(() => {\n    // to the timezone of client\n    setDate(value.toLocaleDateString());\n  }, [value]);\n\n  return (\n    <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>\n      {t('Last updated on')} {date}\n    </p>\n  );\n}\n\nexport { MarkdownCopyButton, ViewOptionsPopover } from 'local:<dir>/ai/page-actions.tsx';\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/shared"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/glass/sidebar"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/glass/header"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "button"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/glass/page/footer"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/glass/page/breadcrumb"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/glass/page/toc"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "ai/page-actions"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "@fuma-translate/react": "^1.0.2",
+    "lucide-react": "^1.34.0"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,38 @@
+{
+  "name": "layouts/home",
+  "files": [
+    {
+      "type": "layout",
+      "path": "layouts/home/index.tsx",
+      "target": "<dir>/home/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/home"
+      },
+      "content": "'use client';\n\nimport type { BaseLayoutProps, NavOptions } from 'local:<dir>/shared/index.tsx';\nimport { type ComponentProps, createContext, type FC, use } from 'react';\nimport { baseSlots, useLinkItems, type BaseSlots, type BaseSlotsProps } from 'local:<dir>/shared/index.tsx';\nimport type { LinkItemType } from 'local:<dir>/shared/index.tsx';\nimport { Container } from 'local:<dir>/home/slots/container.tsx';\nimport { Header } from 'local:<dir>/home/slots/header.tsx';\n\nexport interface HomeLayoutProps extends BaseLayoutProps, ComponentProps<'main'> {\n  nav?: Nav;\n  slots?: Partial<HomeSlots>;\n}\n\ninterface Nav extends NavOptions {\n  /**\n   * Open mobile menu when hovering the trigger\n   */\n  enableHoverToOpen?: boolean;\n}\n\nexport interface HomeSlots extends BaseSlots {\n  header: FC<ComponentProps<'header'>>;\n  container: FC<ComponentProps<'main'>>;\n}\n\nconst LayoutContext = createContext<{\n  props: BaseSlotsProps<HomeLayoutProps>;\n  navItems: LinkItemType[];\n  menuItems: LinkItemType[];\n  slots: HomeSlots;\n} | null>(null);\n\nexport function useHomeLayout() {\n  const context = use(LayoutContext);\n  if (!context)\n    throw new Error('Please use this component under <HomeLayout /> (`fumadocs-ui/layouts/home`).');\n  return context;\n}\n\nconst { useBaseSlots } = baseSlots({\n  useProps() {\n    return useHomeLayout().props;\n  },\n});\n\nexport function HomeLayout(props: HomeLayoutProps) {\n  const {\n    nav: { enabled: navEnabled = true } = {},\n    slots: defaultSlots,\n    children,\n    i18n: _i18n,\n    githubUrl: _githubUrl,\n    links: _links,\n    themeSwitch: _themeSwitch,\n    searchToggle: _searchToggle,\n    ...rest\n  } = props;\n  const { baseSlots, baseProps } = useBaseSlots(props);\n  const linkItems = useLinkItems(props);\n  const slots: HomeSlots = {\n    ...baseSlots,\n    header: defaultSlots?.header ?? InlineHeader,\n    container: defaultSlots?.container ?? Container,\n  };\n\n  return (\n    <LayoutContext\n      value={{\n        props: baseProps,\n        slots,\n        ...linkItems,\n      }}\n    >\n      <slots.container {...rest}>\n        {navEnabled && <slots.header />}\n        {children}\n      </slots.container>\n    </LayoutContext>\n  );\n}\n\nfunction InlineHeader(props: ComponentProps<'header'>) {\n  const { nav } = useHomeLayout().props;\n  if (nav?.component) return nav.component;\n  return <Header {...props} />;\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "layouts/shared"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/home/container"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/home/header"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,48 @@
+{
+  "name": "layouts/home",
+  "files": [
+    {
+      "type": "layout",
+      "path": "layouts/home/index.tsx",
+      "target": "<dir>/home/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/home"
+      },
+      "content": "'use client';\n\nimport type { BaseLayoutProps, NavOptions } from 'local:<dir>/shared/index.tsx';\nimport { type ComponentProps, createContext, type FC, use } from 'react';\nimport { baseSlots, useLinkItems, type BaseSlots, type BaseSlotsProps } from 'local:<dir>/shared/index.tsx';\nimport type { LinkItemType } from 'local:<dir>/shared/index.tsx';\nimport { Container } from 'local:<dir>/home/slots/container.tsx';\nimport { Header } from 'local:<dir>/home/slots/header.tsx';\n\nexport interface HomeLayoutProps extends BaseLayoutProps, ComponentProps<'main'> {\n  nav?: Nav;\n  slots?: Partial<HomeSlots>;\n}\n\ninterface Nav extends NavOptions {\n  /**\n   * Open mobile menu when hovering the trigger\n   */\n  enableHoverToOpen?: boolean;\n}\n\nexport interface HomeSlots extends BaseSlots {\n  header: FC<ComponentProps<'header'>>;\n  container: FC<ComponentProps<'main'>>;\n}\n\nconst LayoutContext = createContext<{\n  props: BaseSlotsProps<HomeLayoutProps>;\n  navItems: LinkItemType[];\n  menuItems: LinkItemType[];\n  slots: HomeSlots;\n} | null>(null);\n\nexport function useHomeLayout() {\n  const context = use(LayoutContext);\n  if (!context)\n    throw new Error('Please use this component under <HomeLayout /> (`fumadocs-ui/layouts/home`).');\n  return context;\n}\n\nconst { useBaseSlots } = baseSlots({\n  useProps() {\n    return useHomeLayout().props;\n  },\n});\n\nexport function HomeLayout(props: HomeLayoutProps) {\n  const {\n    nav: { enabled: navEnabled = true } = {},\n    slots: defaultSlots,\n    children,\n    i18n: _i18n,\n    githubUrl: _githubUrl,\n    links: _links,\n    themeSwitch: _themeSwitch,\n    searchToggle: _searchToggle,\n    ...rest\n  } = props;\n  const { baseSlots, baseProps } = useBaseSlots(props);\n  const linkItems = useLinkItems(props);\n  const slots: HomeSlots = {\n    ...baseSlots,\n    header: defaultSlots?.header ?? Header,\n    container: defaultSlots?.container ?? Container,\n  };\n\n  return (\n    <LayoutContext\n      value={{\n        props: baseProps,\n        slots,\n        ...linkItems,\n      }}\n    >\n      <slots.container {...rest}>\n        {navEnabled && <slots.header />}\n        {children}\n      </slots.container>\n    </LayoutContext>\n  );\n}\n"
+    },
+    {
+      "type": "ui",
+      "path": "components/ui/navigation-menu.tsx",
+      "content": "'use client';\nimport * as React from 'react';\nimport * as Primitive from '@radix-ui/react-navigation-menu';\nimport { cn } from 'local:utils/cn.ts';\n\nexport type NavigationMenuContentProps = Primitive.NavigationMenuContentProps;\nexport type NavigationMenuTriggerProps = Primitive.NavigationMenuTriggerProps;\n\nexport const NavigationMenu = Primitive.Root;\n\nexport const NavigationMenuList = Primitive.List;\n\nexport function NavigationMenuItem({\n  className,\n  children,\n  ...props\n}: React.ComponentProps<typeof Primitive.NavigationMenuItem>) {\n  return (\n    <Primitive.NavigationMenuItem className={cn('list-none', className)} {...props}>\n      {children}\n    </Primitive.NavigationMenuItem>\n  );\n}\n\nexport function NavigationMenuTrigger({\n  className,\n  children,\n  ...props\n}: React.ComponentProps<typeof Primitive.Trigger>) {\n  return (\n    <Primitive.Trigger className={cn('data-[state=open]:bg-fd-accent/50', className)} {...props}>\n      {children}\n    </Primitive.Trigger>\n  );\n}\n\nexport function NavigationMenuContent({\n  className,\n  ...props\n}: React.ComponentProps<typeof Primitive.Content>) {\n  return (\n    <Primitive.Content\n      className={cn(\n        'absolute inset-x-0 top-0 overflow-auto fd-scroll-container max-h-[80svh] data-[motion=from-end]:animate-fd-enterFromRight data-[motion=from-start]:animate-fd-enterFromLeft data-[motion=to-end]:animate-fd-exitToRight data-[motion=to-start]:animate-fd-exitToLeft',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\nexport const NavigationMenuLink = Primitive.Link;\n\nexport function NavigationMenuViewport({\n  className,\n  ref,\n  ...props\n}: React.ComponentProps<typeof Primitive.Viewport>) {\n  return (\n    <div ref={ref} className=\"flex w-full justify-center\">\n      <Primitive.Viewport\n        {...props}\n        className={cn(\n          'relative h-(--radix-navigation-menu-viewport-height) w-full origin-[top_center] overflow-hidden transition-[width,height] duration-300 data-[state=closed]:animate-fd-nav-menu-out data-[state=open]:animate-fd-nav-menu-in',\n          className,\n        )}\n      />\n    </div>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/shared"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/home/container"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/home/header"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "@radix-ui/react-navigation-menu": "^1.2.22"
+  },
+  "devDependencies": {}
+}

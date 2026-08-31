@@ -1,0 +1,26 @@
+export type Translations = {
+  "Address(asyncapi channel section)": string;
+  "Authorization(operation page)": string;
+  "Authorization(security scheme)": string;
+  "Basic <token>(security scheme)": string;
+  "Bearer <token>(security scheme)": string;
+  "Bindings": string;
+  "Bindings(operation page)": string;
+  "Correlation ID(operation page)": string;
+  "Description(asyncapi channel section)": string;
+  "Enter Value(playground server select)": string;
+  "Headers": string;
+  "Headers(operation page)": string;
+  "In(security scheme)": string;
+  "Message Example(asyncapi message example)": string;
+  "Messages(operation page)": string;
+  "No additional configuration for this binding.(bindings)": string;
+  "OpenID Connect(security scheme)": string;
+  "Parameters(operation page)": string;
+  "Payload": string;
+  "Payload(operation page)": string;
+  "Reply(operation page)": string;
+  "Scope(security scheme)": string;
+  "Server URL(playground server select)": string;
+  "The base URL of your API endpoint.(playground server select)": string;
+};

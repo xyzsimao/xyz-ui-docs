@@ -1,28 +1,24 @@
-import type { Root } from 'hast'
-import type { RehypeShikiOptions } from '@shikijs/rehype'
-import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import type { Root } from 'hast';
+import rehypeShikiFromHighlighter, { type RehypeShikiCoreOptions } from './rehype-code/shiki';
 import {
   transformerNotationDiff,
   transformerNotationFocus,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
-} from '@shikijs/transformers'
-import type { Processor, Transformer } from 'unified'
-import type { Highlighter, ShikiTransformer } from 'shiki'
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx'
-import type { CodeBlockIcon, IconOptions } from './transformer-icon'
-import { transformerIcon } from './transformer-icon'
-import { parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils'
-import type { DistributiveOmit } from '@/types'
-import type { ResolvedShikiConfig } from '@/highlight/config'
+} from '@shikijs/transformers';
+import type { Processor, Transformer } from 'unified';
+import type { BuiltinLanguage, HighlighterCore, LanguageInput, ShikiTransformer } from 'shiki';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { CodeBlockIcon, IconOptions } from './transformer-icon';
+import { transformerIcon } from './transformer-icon';
+import { parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
+import type { Awaitable } from '@/types';
+import type { ShikiFactory } from '@/highlight/shiki';
+import { defaultThemes, getRequiredThemes } from '@/highlight/utils';
 
-export function rehypeCodeDefaultOptions(
-  config: ResolvedShikiConfig
-): RehypeCodeOptionsCommon {
+export function rehypeCodeDefaultOptions(): RehypeCodeOptionsCommon {
   return {
-    lazy: true,
-    ...config.defaultThemes,
-    defaultColor: false,
+    ...defaultThemes,
     defaultLanguage: 'plaintext',
     transformers: [
       transformerNotationHighlight({
@@ -39,138 +35,115 @@ export function rehypeCodeDefaultOptions(
       }),
     ],
     parseMetaString(meta) {
-      const parsed = parseCodeBlockAttributes(meta, ['title', 'tab'])
-      const data: Record<string, unknown> = parsed.attributes
-      parsed.rest = parseLineNumber(parsed.rest, data)
+      const parsed = parseCodeBlockAttributes(meta, ['title', 'tab', 'noCopy', 'lineNumbers']);
+      const data: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(parsed.attributes)) {
+        if (k === 'noCopy') {
+          data.allowCopy = 'false';
+          continue;
+        }
 
-      data.__parsed_raw = parsed.rest
-      return data
+        if (k === 'lineNumbers') {
+          data['data-line-numbers'] = true;
+          if (typeof v === 'number') {
+            data['data-line-numbers-start'] = v;
+          }
+          continue;
+        }
+
+        data[k] = v;
+      }
+
+      data.__raw = parsed.rest;
+      return data;
     },
-  }
+  };
 }
 
-function parseLineNumber(str: string, data: Record<string, unknown>) {
-  return str.replace(/lineNumbers=(\d+)|lineNumbers/, (_, ...args) => {
-    data['data-line-numbers'] = true
-
-    if (args[0] !== undefined) data['data-line-numbers-start'] = Number(args[0])
-
-    return ''
-  })
-}
-
-export type RehypeCodeOptionsCommon = DistributiveOmit<
-  RehypeShikiOptions,
-  'lazy'
-> & {
+export type RehypeCodeOptionsCommon = RehypeShikiCoreOptions & {
   /**
-   * Load languages and themes on-demand.
-   * @defaultValue true
+   * Language names to include & preload.
    */
-  lazy?: boolean
-
+  langs?: Array<LanguageInput | BuiltinLanguage>;
   /**
-   * Filter meta string before processing
+   * Alias of languages
+   * @example { 'my-lang': 'javascript' }
    */
-  filterMetaString?: (metaString: string) => string
+  langAlias?: Record<string, string>;
 
   /**
    * Add icon to code blocks
    */
-  icon?: IconOptions | false
+  icon?: IconOptions | false;
 
   /**
    * Wrap code blocks in `<Tab>` component when "tab" meta string presents
    *
    * @defaultValue true
    */
-  tab?: boolean
-}
+  tab?: boolean;
+};
 
 export function createRehypeCode<
-  Options extends Partial<RehypeCodeOptionsCommon> =
-    Partial<RehypeCodeOptionsCommon>,
+  Options extends Partial<RehypeCodeOptionsCommon> = Partial<RehypeCodeOptionsCommon>,
 >(
-  configFactory:
-    | ResolvedShikiConfig
-    | ((options?: Options) => {
-        config: ResolvedShikiConfig
-        options: RehypeCodeOptionsCommon
-      })
+  highlighterFactory:
+    | ShikiFactory
+    | ((options?: Options) => Awaitable<{
+        highlighter: HighlighterCore;
+        options: RehypeCodeOptionsCommon;
+      }>),
 ) {
-  return function rehypeCode(
-    this: Processor,
-    _options: Options | undefined
-  ): Transformer<Root, Root> {
-    const { config, options } =
-      typeof configFactory === 'function'
-        ? configFactory(_options)
-        : {
-            config: configFactory,
-            options: {
-              ...rehypeCodeDefaultOptions(configFactory),
-              ..._options,
-            },
-          }
+  async function initTransformer(_options?: Options) {
+    let highlighter: HighlighterCore;
+    let options: RehypeCodeOptionsCommon;
+    if (typeof highlighterFactory === 'function') {
+      const out = await highlighterFactory(_options);
+      highlighter = out.highlighter;
+      options = out.options;
+    } else {
+      // TODO: When newer Shiki supported it, register lang alias dynamically instead of creating new instance
+      highlighter = _options?.langAlias
+        ? await highlighterFactory.init(_options)
+        : await highlighterFactory.getOrInit();
+      options = (_options ?? {}) as RehypeCodeOptionsCommon;
+    }
 
-    const transformers = options.transformers ? [...options.transformers] : []
-    transformers.unshift({
-      name: 'rehype-code:pre-process',
-      preprocess(code, { meta }) {
-        if (meta && '__parsed_raw' in meta) {
-          meta.__raw = meta.__parsed_raw
-          delete meta.__parsed_raw
-        }
-
-        if (meta && options.filterMetaString) {
-          meta.__raw = options.filterMetaString(meta.__raw ?? '')
-        }
-
-        // Remove empty line at end
-        return code.replace(/\n$/, '')
-      },
-    })
+    const transformers: ShikiTransformer[] = options.transformers ? [...options.transformers] : [];
 
     if (options.icon !== false) {
-      transformers.push(transformerIcon(options.icon))
+      transformers.push(transformerIcon(options.icon));
     }
 
     if (options.tab !== false) {
-      transformers.push(transformerTab())
+      transformers.push(transformerTab());
     }
 
-    const transformer = Promise.resolve(config.createHighlighter()).then(
-      async (highlighter) => {
-        if ('themes' in options) {
-          await highlighter.loadTheme(
-            ...(Object.values(options.themes).filter(Boolean) as never[])
-          )
-        } else {
-          await highlighter.loadTheme(options.theme as never)
-        }
+    const lazy = options.lazy ?? true;
+    let preloadLangs: unknown[] | undefined = options.langs;
+    if (!lazy) {
+      preloadLangs ??= Object.keys(highlighter.getBundledLanguages());
+    }
 
-        const langs =
-          options.langs ??
-          (options.lazy
-            ? ['js', 'jsx', 'ts', 'tsx']
-            : Object.keys(highlighter.getBundledLanguages()))
+    await Promise.all([
+      highlighter.loadTheme(...(getRequiredThemes(options) as never[])),
+      preloadLangs && highlighter.loadLanguage(...(preloadLangs as never[])),
+    ]);
+    return rehypeShikiFromHighlighter(highlighter, {
+      ...options,
+      transformers,
+    });
+  }
 
-        await highlighter.loadLanguage(...(langs as never[]))
-        return rehypeShikiFromHighlighter(highlighter as Highlighter, {
-          ...options,
-          transformers,
-        })
-      }
-    )
+  return function rehypeCode(this: Processor, _options?: Options): Transformer<Root, Root> {
+    const transformer = initTransformer(_options);
 
     return async (tree, file) => {
       await (
         await transformer
-      )(tree, file, () => {
-        // nothing
-      })
-    }
-  }
+      )(tree, file, () => undefined);
+    };
+  };
 }
 
 function transformerTab(): ShikiTransformer {
@@ -178,11 +151,11 @@ function transformerTab(): ShikiTransformer {
     name: 'rehype-code:tab',
     // @ts-expect-error -- types not compatible with MDX
     root(root) {
-      const value = this.options.meta?.tab
-      if (typeof value !== 'string') return root
+      const value = this.options.meta?.tab;
+      if (typeof value !== 'string') return root;
       console.warn(
-        '[xyzdocs] For `tab="value" in codeblocks, please use `remarkCodeTab` plugin instead.'
-      )
+        '[Fumadocs] For `tab="value" in codeblocks, please use `remarkCodeTab` plugin instead.',
+      );
 
       return {
         type: 'root',
@@ -197,9 +170,9 @@ function transformerTab(): ShikiTransformer {
             children: root.children,
           } as MdxJsxFlowElement,
         ],
-      }
+      };
     },
-  }
+  };
 }
 
-export { type CodeBlockIcon, transformerIcon, transformerTab }
+export { type CodeBlockIcon, transformerIcon, transformerTab };

@@ -1,12 +1,5 @@
-import { useState } from 'react'
-
-function isDifferent(a: unknown, b: unknown): boolean {
-  if (Array.isArray(a) && Array.isArray(b)) {
-    return b.length !== a.length || a.some((v, i) => isDifferent(v, b[i]))
-  }
-
-  return a !== b
-}
+import { useState } from 'react';
+import { isEqualShallow } from './is-equal';
 
 /**
  * @param value - state to watch
@@ -16,12 +9,12 @@ function isDifferent(a: unknown, b: unknown): boolean {
 export function useOnChange<T>(
   value: T,
   onChange: (current: T, previous: T) => void,
-  isUpdated: (prev: T, current: T) => boolean = isDifferent
+  isUpdated: (prev: T, current: T) => boolean = (a, b) => !isEqualShallow(a, b),
 ): void {
-  const [prev, setPrev] = useState<T>(value)
+  const [prev, setPrev] = useState<T>(value);
 
   if (isUpdated(prev, value)) {
-    onChange(value, prev)
-    setPrev(value)
+    onChange(value, prev);
+    setPrev(value);
   }
 }

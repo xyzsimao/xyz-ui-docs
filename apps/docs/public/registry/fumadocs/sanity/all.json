@@ -1,0 +1,38 @@
+{
+  "name": "all",
+  "files": [],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/sanity",
+      "component": "base"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/sanity",
+      "component": "accordion"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/sanity",
+      "component": "files"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/sanity",
+      "component": "steps"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/sanity",
+      "component": "tabs"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "sanity": null
+  },
+  "devDependencies": {}
+}

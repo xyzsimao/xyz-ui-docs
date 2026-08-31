@@ -1,29 +1,24 @@
-import type {
-  BlockContent,
-  DefinitionContent,
-  PhrasingContent,
-  Root,
-} from 'mdast'
-import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx'
-import { Transformer } from 'unified'
-import { visit } from 'unist-util-visit'
+import type { BlockContent, DefinitionContent, PhrasingContent, Root } from 'mdast';
+import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { Transformer } from 'unified';
+import { visit } from 'unist-util-visit';
 
 export interface RemarkDirectiveAdmonitionOptions {
   /**
    * the tag names of Callout component.
    */
   tags?: {
-    CalloutContainer?: string
-    CalloutTitle?: string
-    CalloutDescription?: string
-  }
+    CalloutContainer?: string;
+    CalloutTitle?: string;
+    CalloutDescription?: string;
+  };
 
   /**
    * All supported admonition types and their linked Callout type.
    *
    * When specified, all defaults will be cleared.
    */
-  types?: Record<string, string>
+  types?: Record<string, string>;
 }
 
 /**
@@ -49,7 +44,7 @@ export function remarkDirectiveAdmonition({
 }: RemarkDirectiveAdmonitionOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     visit(tree, 'containerDirective', (node) => {
-      if (!(node.name in types)) return
+      if (!(node.name in types)) return;
 
       const attributes: MdxJsxAttribute[] = [
         {
@@ -57,28 +52,28 @@ export function remarkDirectiveAdmonition({
           name: 'type',
           value: types[node.name],
         },
-      ]
+      ];
 
       for (const [k, v] of Object.entries(node.attributes ?? {})) {
         attributes.push({
           type: 'mdxJsxAttribute',
           name: k,
           value: v,
-        })
+        });
       }
 
-      const titleNodes: PhrasingContent[] = []
-      const descriptionNodes: (BlockContent | DefinitionContent)[] = []
+      const titleNodes: PhrasingContent[] = [];
+      const descriptionNodes: (BlockContent | DefinitionContent)[] = [];
 
       for (const item of node.children) {
         if (item.type === 'paragraph' && item.data?.directiveLabel) {
-          titleNodes.push(...item.children)
+          titleNodes.push(...item.children);
         } else {
-          descriptionNodes.push(item)
+          descriptionNodes.push(item);
         }
       }
 
-      const children: MdxJsxFlowElement[] = []
+      const children: MdxJsxFlowElement[] = [];
 
       if (titleNodes.length > 0) {
         children.push({
@@ -86,7 +81,7 @@ export function remarkDirectiveAdmonition({
           name: CalloutTitle,
           attributes: [],
           children: titleNodes as BlockContent[],
-        })
+        });
       }
 
       if (descriptionNodes.length > 0) {
@@ -95,7 +90,7 @@ export function remarkDirectiveAdmonition({
           name: CalloutDescription,
           attributes: [],
           children: descriptionNodes,
-        })
+        });
       }
 
       Object.assign(node, {
@@ -103,7 +98,7 @@ export function remarkDirectiveAdmonition({
         attributes,
         name: CalloutContainer,
         children,
-      } satisfies MdxJsxFlowElement)
-    })
-  }
+      } satisfies MdxJsxFlowElement);
+    });
+  };
 }

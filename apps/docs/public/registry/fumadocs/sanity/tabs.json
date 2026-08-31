@@ -1,0 +1,26 @@
+{
+  "name": "tabs",
+  "files": [
+    {
+      "type": "lib",
+      "path": "tabs.ts",
+      "target": "<dir>/sanity/tabs.ts",
+      "content": "import { defineType, defineField } from 'sanity';\n\nexport const tab = defineType({\n  name: 'tab',\n  type: 'object',\n  title: 'Tab',\n  fields: [\n    defineField({\n      name: 'title',\n      title: 'Title',\n      type: 'string',\n      validation: (r) => r.required(),\n    }),\n    defineField({\n      name: 'body',\n      title: 'Body',\n      type: 'blockContent',\n    }),\n  ],\n  preview: {\n    select: {\n      title: 'title',\n      subtitle: 'body',\n    },\n  },\n});\n\nexport const tabs = defineType({\n  name: 'tabs',\n  type: 'object',\n  title: 'Tabs',\n  fields: [\n    defineField({\n      name: 'items',\n      title: 'Items',\n      type: 'array',\n      of: [{ type: 'tab' }],\n    }),\n  ],\n  preview: {\n    select: {\n      items: 'items',\n    },\n    prepare({ items = [] }) {\n      return {\n        title: `${items.length} Tabs`,\n      };\n    },\n  },\n});\n"
+    },
+    {
+      "type": "components",
+      "path": "tabs.component.tsx",
+      "target": "<dir>/sanity/tabs.tsx",
+      "content": "import type {\n  NodeRenderer,\n  PortableTextBlock,\n  PortableTextTypeComponent,\n} from '@portabletext/react';\nimport { Tab, Tabs, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';\n\nexport interface TabValue {\n  _key?: string;\n  _type: 'tab';\n  title?: string;\n  body?: PortableTextBlock[];\n}\n\nexport interface TabsValue {\n  _type: 'tabs';\n  items?: TabValue[];\n}\n\nfunction renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {\n  return (\n    blocks?.map((node, index) => renderNode({ node, index, isInline: false, renderNode })) ?? null\n  );\n}\n\nexport const tabsComponents: {\n  tab: PortableTextTypeComponent<TabValue>;\n  tabs: PortableTextTypeComponent<TabsValue>;\n} = {\n  tab({ value, renderNode }) {\n    return renderBlocks(value.body, renderNode);\n  },\n  tabs({ value, renderNode }) {\n    const items = value.items ?? [];\n\n    if (items.length === 0) return null;\n\n    return (\n      <Tabs>\n        <TabsList>\n          {items.map((item, i) => (\n            <TabsTrigger key={item._key ?? i} value={item._key ?? i.toString()}>\n              {item.title ?? `Tab ${i + 1}`}\n            </TabsTrigger>\n          ))}\n        </TabsList>\n        {items.map((item, i) => (\n          <Tab key={item._key ?? i} value={item._key ?? i.toString()}>\n            {renderBlocks(item.body, renderNode)}\n          </Tab>\n        ))}\n      </Tabs>\n    );\n  },\n};\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "sanity": null,
+    "@portabletext/react": "^8.0.1"
+  },
+  "devDependencies": {}
+}

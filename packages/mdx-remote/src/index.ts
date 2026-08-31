@@ -1,23 +1,19 @@
-import type { TableOfContents } from 'xyzdocs-core/toc'
-import type { MdxContent } from '@/render'
+import type { TOCItemType } from 'fumadocs-core/toc';
+import type { MdxContent } from '@/render';
 
-export * from './compile'
-export { parseFrontmatter } from './utils'
+export * from './compile';
+export { parseFrontmatter } from './utils';
 
 /**
  * @deprecated Use `compiler.render` instead
  */
-export async function executeMdx(
-  compiled: string,
-  scope: object,
-  baseUrl?: string | URL,
-) {
-  let jsxRuntime
+export async function executeMdx(compiled: string, scope: object, baseUrl?: string | URL) {
+  let jsxRuntime;
 
   if (process.env.NODE_ENV === 'production') {
-    jsxRuntime = await import('react/jsx-runtime')
+    jsxRuntime = await import('react/jsx-runtime');
   } else {
-    jsxRuntime = await import('react/jsx-dev-runtime')
+    jsxRuntime = await import('react/jsx-dev-runtime');
   }
 
   const fullScope = {
@@ -26,15 +22,15 @@ export async function executeMdx(
       baseUrl,
     },
     ...scope,
-  }
+  };
 
-  const values = Object.values(fullScope)
-  const params = Object.keys(fullScope)
-  params.push(`return (async () => { ${compiled} })()`)
-  const hydrateFn = new Function(...params)
+  const values = Object.values(fullScope);
+  const params = Object.keys(fullScope);
+  params.push(`return (async () => { ${compiled} })()`);
+  const hydrateFn = new Function(...params);
 
   return (await hydrateFn.apply(hydrateFn, values)) as {
-    default: MdxContent
-    toc?: TableOfContents
-  }
+    default: MdxContent;
+    toc?: TOCItemType[];
+  };
 }

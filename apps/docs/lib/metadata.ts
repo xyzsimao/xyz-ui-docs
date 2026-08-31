@@ -7,9 +7,9 @@ export function createMetadata(override: Metadata): Metadata {
     openGraph: {
       title: override.title ?? undefined,
       description: override.description ?? undefined,
-      url: 'https://xyzdocs.dev',
+      url: 'https://fumadocs.dev',
       images: '/banner.png',
-      siteName: 'xyzdocs',
+      siteName: 'Fumadocs',
       ...override.openGraph,
     },
     twitter: {
@@ -24,8 +24,8 @@ export function createMetadata(override: Metadata): Metadata {
       types: {
         'application/rss+xml': [
           {
-            title: 'xyzdocs Blog',
-            url: 'https://xyzdocs.dev/blog/rss.xml',
+            title: 'Fumadocs Blog',
+            url: 'https://fumadocs.dev/blog/rss.xml',
           },
         ],
       },
@@ -34,12 +34,12 @@ export function createMetadata(override: Metadata): Metadata {
   }
 }
 
-export function getPageImage(page: Page) {
+export function getPageImageUrl(page: Page) {
   const segments = [...page.slugs, 'image.webp']
 
   return {
     segments,
-    url: `/og/${segments.join('/')}`,
+    url: '/' + [page.locale, 'og', ...segments].filter(Boolean).join('/'),
   }
 }
 

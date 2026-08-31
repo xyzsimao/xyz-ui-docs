@@ -1,0 +1,37 @@
+{
+  "name": "slots/shared/language-select",
+  "files": [
+    {
+      "path": "layouts/shared/slots/language-select.tsx",
+      "type": "layout",
+      "target": "<dir>/shared/slots/language-select.tsx",
+      "content": "'use client';\nimport type { ComponentProps } from 'react';\nimport { useI18n } from '@fumadocs/base-ui/contexts/i18n';\nimport { useTranslations } from '@fuma-translate/react';\nimport { Popover, PopoverContent, PopoverTrigger } from 'local:components/ui/popover.tsx';\nimport { cn } from 'local:utils/cn.ts';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport type { VariantProps } from 'class-variance-authority';\n\nexport interface LanguageSelectProps extends ComponentProps<'button'> {\n  variant?: VariantProps<typeof buttonVariants>['variant'];\n}\n\nexport function LanguageSelect({\n  className,\n  variant = 'ghost',\n  children,\n  ...rest\n}: LanguageSelectProps): React.ReactElement {\n  const context = useI18n();\n  const t = useTranslations({ note: 'language switcher' });\n  if (!context.locales) throw new Error('Missing `<I18nProvider />`');\n\n  const chooseLanguage = t('Choose a language');\n\n  return (\n    <Popover>\n      <PopoverTrigger\n        aria-label={t('Choose a language', { note: 'aria-label' })}\n        className={(s) =>\n          cn(buttonVariants({ variant }), 'gap-1.5 p-1.5', s.open && 'bg-fd-accent', className)\n        }\n        {...rest}\n      >\n        {children}\n      </PopoverTrigger>\n      <PopoverContent className=\"flex flex-col gap-0.5 p-1\">\n        <p className=\"p-2 text-xs font-medium text-fd-muted-foreground\">{chooseLanguage}</p>\n        {context.locales.map((item) => (\n          <button\n            key={item.locale}\n            type=\"button\"\n            className={cn(\n              'px-2 py-1.5 text-start text-sm rounded-lg transition-colors',\n              item.locale === context.locale\n                ? 'bg-fd-primary/10 text-fd-primary'\n                : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',\n            )}\n            onClick={() => {\n              context.onChange?.(item.locale);\n            }}\n          >\n            {item.name}\n          </button>\n        ))}\n      </PopoverContent>\n    </Popover>\n  );\n}\n\nexport type LanguageSelectTextProps = ComponentProps<'span'>;\n\nexport function LanguageSelectText(props: LanguageSelectTextProps) {\n  const { locales, locale } = useI18n();\n  const text = locales?.find((item) => item.locale === locale)?.name;\n\n  return <span {...props}>{text}</span>;\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "popover"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "button"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "@fuma-translate/react": "^1.0.2",
+    "class-variance-authority": "^0.7.1"
+  },
+  "devDependencies": {}
+}

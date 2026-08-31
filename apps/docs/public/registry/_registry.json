@@ -1,0 +1,49 @@
+{
+  "indexes": [
+    {
+      "name": "graph-view",
+      "description": "A graph to display relationships of all pages"
+    },
+    {
+      "name": "feedback",
+      "description": "Component to send user feedbacks about the docs",
+      "title": "Feedback"
+    },
+    {
+      "name": "ai/openrouter",
+      "description": "Ask AI dialog for your docs, default using OpenRouter",
+      "title": "AI Chat (AI SDK)"
+    },
+    {
+      "name": "ai/llmgateway",
+      "description": "Ask AI dialog for your docs, using LLMGateway",
+      "title": "AI Chat (LLMGateway)"
+    },
+    {
+      "name": "ai/inkeep",
+      "description": "Ask AI dialog for your docs, requires Inkeep AI",
+      "title": "AI Chat (Inkeep AI)"
+    },
+    {
+      "name": "og/mono",
+      "description": "Open graph image generation - mono style"
+    }
+  ],
+  "unlistedIndexes": [
+    {
+      "name": "layouts/docs-min",
+      "description": "Replace Docs Layout (Minimal)"
+    },
+    {
+      "name": "ai/shared"
+    },
+    {
+      "name": "markdown"
+    }
+  ],
+  "registries": [
+    "fumadocs/radix-ui",
+    "fumadocs/base-ui",
+    "fumadocs/sanity"
+  ]
+}

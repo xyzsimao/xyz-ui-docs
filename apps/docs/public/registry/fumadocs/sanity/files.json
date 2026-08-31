@@ -1,0 +1,26 @@
+{
+  "name": "files",
+  "files": [
+    {
+      "type": "lib",
+      "path": "files.ts",
+      "target": "<dir>/sanity/files.ts",
+      "content": "import { defineType, defineField } from 'sanity';\n\nconst fileTreeItems = [{ type: 'file' }, { type: 'folder' }];\n\nexport const file = defineType({\n  name: 'file',\n  type: 'object',\n  title: 'File',\n  fields: [\n    defineField({\n      name: 'name',\n      title: 'Name',\n      type: 'string',\n      validation: (r) => r.required(),\n    }),\n  ],\n  preview: {\n    select: {\n      title: 'name',\n    },\n  },\n});\n\nexport const folder = defineType({\n  name: 'folder',\n  type: 'object',\n  title: 'Folder',\n  fields: [\n    defineField({\n      name: 'name',\n      title: 'Name',\n      type: 'string',\n      validation: (r) => r.required(),\n    }),\n    defineField({\n      name: 'defaultOpen',\n      title: 'Open by default',\n      type: 'boolean',\n      initialValue: false,\n    }),\n    defineField({\n      name: 'items',\n      title: 'Items',\n      type: 'array',\n      of: fileTreeItems,\n    }),\n  ],\n  preview: {\n    select: {\n      title: 'name',\n    },\n  },\n});\n\nexport const files = defineType({\n  name: 'files',\n  type: 'object',\n  title: 'Files',\n  fields: [\n    defineField({\n      name: 'items',\n      title: 'Items',\n      type: 'array',\n      of: fileTreeItems,\n    }),\n  ],\n  preview: {\n    prepare() {\n      return {\n        title: 'File Tree',\n      };\n    },\n  },\n});\n"
+    },
+    {
+      "type": "components",
+      "path": "files.component.tsx",
+      "target": "<dir>/sanity/files.tsx",
+      "content": "import type { PortableTextTypeComponent } from '@portabletext/react';\nimport { File, Files, Folder } from 'fumadocs-ui/components/files';\n\nexport interface FileValue {\n  _key?: string;\n  _type: 'file';\n  name?: string;\n}\n\nexport interface FolderValue {\n  _key?: string;\n  _type: 'folder';\n  name?: string;\n  defaultOpen?: boolean;\n  items?: FileTreeItem[];\n}\n\nexport interface FilesValue {\n  _type: 'files';\n  items?: FileTreeItem[];\n}\n\ntype FileTreeItem = FileValue | FolderValue;\n\nfunction renderFileTree(items: FileTreeItem[] | undefined) {\n  return items?.map((item, index) => {\n    const key = item._key ?? index;\n\n    if (item._type === 'folder') {\n      return (\n        <Folder key={key} name={item.name ?? ''} defaultOpen={item.defaultOpen}>\n          {renderFileTree(item.items)}\n        </Folder>\n      );\n    }\n\n    return <File key={key} name={item.name ?? ''} />;\n  });\n}\n\nexport const filesComponents: {\n  file: PortableTextTypeComponent<FileValue>;\n  folder: PortableTextTypeComponent<FolderValue>;\n  files: PortableTextTypeComponent<FilesValue>;\n} = {\n  file({ value }) {\n    return <File name={value.name ?? ''} />;\n  },\n  folder({ value }) {\n    return (\n      <Folder name={value.name ?? ''} defaultOpen={value.defaultOpen}>\n        {renderFileTree(value.items)}\n      </Folder>\n    );\n  },\n  files({ value }) {\n    return <Files>{renderFileTree(value.items)}</Files>;\n  },\n};\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "sanity": null,
+    "@portabletext/react": "^8.0.1"
+  },
+  "devDependencies": {}
+}

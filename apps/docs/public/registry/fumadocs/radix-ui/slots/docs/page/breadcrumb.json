@@ -1,0 +1,25 @@
+{
+  "name": "slots/docs/page/breadcrumb",
+  "files": [
+    {
+      "path": "layouts/docs/page/slots/breadcrumb.tsx",
+      "type": "layout",
+      "target": "<dir>/docs/page/slots/breadcrumb.tsx",
+      "content": "'use client';\n\nimport { useTreePath, useTreeContext } from 'fumadocs-ui/contexts/tree';\nimport { cn } from 'local:utils/cn.ts';\nimport { type BreadcrumbOptions, getBreadcrumbItemsFromPath } from 'fumadocs-core/breadcrumb';\nimport Link from 'fumadocs-core/link';\nimport { ChevronRight } from 'lucide-react';\nimport { type ComponentProps, useMemo, Fragment } from 'react';\n\nexport type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;\n\nexport function Breadcrumb({\n  includeRoot,\n  includeSeparator,\n  includePage,\n  ...props\n}: BreadcrumbProps) {\n  const path = useTreePath();\n  const { root } = useTreeContext();\n  const items = useMemo(() => {\n    return getBreadcrumbItemsFromPath(root, path, {\n      includePage,\n      includeSeparator,\n      includeRoot,\n    });\n  }, [includePage, includeRoot, includeSeparator, path, root]);\n\n  if (items.length === 0) return null;\n\n  return (\n    <div\n      {...props}\n      className={cn('flex items-center gap-1.5 text-sm text-fd-muted-foreground', props.className)}\n    >\n      {items.map((item, i) => {\n        const className = cn('truncate', i === items.length - 1 && 'text-fd-primary font-medium');\n\n        return (\n          <Fragment key={i}>\n            {i !== 0 && <ChevronRight className=\"size-3.5 shrink-0\" />}\n            {item.url ? (\n              <Link\n                href={item.url}\n                className={cn(className, 'transition-opacity hover:opacity-80')}\n              >\n                {item.name}\n              </Link>\n            ) : (\n              <span className={className}>{item.name}</span>\n            )}\n          </Fragment>\n        );\n      })}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "lucide-react": "^1.34.0"
+  },
+  "devDependencies": {}
+}

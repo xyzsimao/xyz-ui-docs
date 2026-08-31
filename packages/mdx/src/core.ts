@@ -3,72 +3,56 @@ import type {
   DocCollectionItem,
   LoadedConfig,
   MetaCollectionItem,
-} from '@/config/build'
-import path from 'node:path'
-import fs from 'node:fs/promises'
-import type { FSWatcher } from 'chokidar'
-import { validate } from './utils/validation'
-import type { VFile } from 'vfile'
-import type { IndexFilePlugin } from './plugins/index-file'
-// import type { PostprocessOptions } from './config'
-import { ident } from './utils/codegen'
+} from '@/config/build';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import type { FSWatcher } from 'chokidar';
+import { validate } from './utils/validation';
+import type { VFile } from 'vfile';
+import type { IndexFilePlugin } from './plugins/index-file';
+import { ident } from './utils/codegen';
+// type-only: `@/macro/eval` pulls in build-time deps, and core also runs in the app runtime
+import type { MacroCollector } from './macro/eval';
+
+type Awaitable<T> = T | Promise<T>;
 
 export interface EmitEntry {
   /**
    * path relative to output directory
    */
-  path: string
-  content: string
+  path: string;
+  content: string;
 }
 
-export interface EmitOptions {
-  /**
-   * filter the plugins to run emit
-   */
-  filterPlugin?: (plugin: Plugin) => boolean
-
-  /**
-   * filter the workspaces to run emit
-   */
-  filterWorkspace?: (workspace: string) => boolean
-
-  /**
-   * write files
-   */
-  write?: boolean
+export interface PluginContext {
+  core: Core;
 }
 
-export type CompilationContext<Collection> = PluginContext &
-  TransformOptions<Collection>
+export type CompilationContext<Collection> = PluginContext & TransformOptions<Collection>;
 
-export interface EmitOutput {
-  entries: EmitEntry[]
-  workspaces: Record<string, EmitEntry[]>
+export interface TransformOptions<Collection> {
+  collection: Collection;
+  filePath: string;
+  source: string;
 }
 
 export interface Plugin extends IndexFilePlugin {
-  name?: string
+  name?: string;
 
   /**
    * on config loaded/updated
    */
-  config?: (
-    this: PluginContext,
-    config: LoadedConfig,
-  ) => Awaitable<void | LoadedConfig>
+  config?: (this: PluginContext, config: LoadedConfig) => Awaitable<void | LoadedConfig>;
 
   /**
    * Generate files (e.g. types, index file, or JSON schemas)
    */
-  emit?: (this: PluginContext) => Awaitable<EmitEntry[]>
+  emit?: (this: PluginContext) => Awaitable<EmitEntry[]>;
 
   /**
-   * Configure xyzdocs dev server
+   * Configure Fumadocs dev server
    */
-  configureServer?: (
-    this: PluginContext,
-    server: ServerContext,
-  ) => Awaitable<void>
+  configureServer?: (this: PluginContext, server: ServerContext) => Awaitable<void>;
 
   meta?: {
     /**
@@ -77,8 +61,8 @@ export interface Plugin extends IndexFilePlugin {
     transform?: (
       this: CompilationContext<MetaCollectionItem>,
       data: unknown,
-    ) => Awaitable<unknown | void>
-  }
+    ) => Awaitable<unknown | void>;
+  };
 
   doc?: {
     /**
@@ -87,25 +71,16 @@ export interface Plugin extends IndexFilePlugin {
     frontmatter?: (
       this: CompilationContext<DocCollectionItem>,
       data: Record<string, unknown>,
-    ) => Awaitable<Record<string, unknown> | void>
+    ) => Awaitable<Record<string, unknown> | void>;
 
     /**
      * Transform `vfile` on compilation stage
      */
-    vfile?: (
-      this: CompilationContext<DocCollectionItem>,
-      file: VFile,
-    ) => Awaitable<VFile | void>
-  }
+    vfile?: (this: CompilationContext<DocCollectionItem>, file: VFile) => Awaitable<VFile | void>;
+  };
 }
 
-export type PluginOption = Awaitable<
-  Plugin | PluginOption[] | false | undefined
->
-
-export interface PluginContext {
-  core: Core
-}
+export type PluginOption = Awaitable<Plugin | PluginOption[] | false | undefined>;
 
 export interface ServerContext {
   /**
@@ -113,60 +88,84 @@ export interface ServerContext {
    *
    * make sure to filter when listening to events
    */
-  watcher?: FSWatcher
+  watcher?: FSWatcher;
 }
 
 export interface CoreOptions {
-  environment: string
-  configPath: string
-  outDir: string
-  plugins?: PluginOption[]
+  root?: string;
+  environment: string;
+  plugins?: PluginOption[];
+  /**
+   * @defaultValue source.config.ts
+   */
+  configPath?: string;
+
+  /**
+   * Output directory of generated files
+   *
+   * @defaultValue '.source'
+   */
+  outDir?: string;
 
   /**
    * the workspace info if this instance is created as a workspace
    */
   workspace?: {
-    parent: Core
-    name: string
-    dir: string
-  }
+    parent: Core;
+    name: string;
+    dir: string;
+  };
+}
+
+export interface EmitOptions {
+  /**
+   * filter the plugins to run emit
+   */
+  filterPlugin?: (plugin: Plugin) => boolean;
+
+  /**
+   * filter the workspaces to run emit
+   */
+  filterWorkspace?: (workspace: string) => boolean;
+
+  /**
+   * write files
+   */
+  write?: boolean;
+}
+
+export interface EmitOutput {
+  entries: EmitEntry[];
+  workspaces: Record<string, EmitEntry[]>;
 }
 
 export const _Defaults = {
   configPath: 'source.config.ts',
   outDir: '.source',
-}
-
-type Awaitable<T> = T | Promise<T>
+};
 
 async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
-  const plugins: Plugin[] = []
+  const plugins: Plugin[] = [];
 
   for await (const option of pluginOptions) {
-    if (!option) continue
-    if (Array.isArray(option)) plugins.push(...(await getPlugins(option)))
-    else plugins.push(option)
+    if (!option) continue;
+    if (Array.isArray(option)) plugins.push(...(await getPlugins(option)));
+    else plugins.push(option);
   }
 
-  return plugins
-}
-
-export interface TransformOptions<Collection> {
-  collection: Collection
-  filePath: string
-  source: string
+  return plugins;
 }
 
 export function createCore(options: CoreOptions) {
-  let config: LoadedConfig
-  let plugins: Plugin[]
-  const workspaces = new Map<string, Core>()
+  const root = options.root ? path.resolve(options.root) : process.cwd();
+  const outDir = path.resolve(root, options.outDir ?? '.source');
+  const configPath = path.resolve(root, options.configPath ?? 'source.config.ts');
+  let config: LoadedConfig;
+  let plugins: Plugin[];
+  const workspaces = new Map<string, Core>();
+
   async function transformMetadata<T>(
-    {
-      collection,
-      filePath,
-      source,
-    }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
+    { collection, filePath, source }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
     data: unknown,
   ): Promise<T> {
     if (collection.schema) {
@@ -177,10 +176,10 @@ export function createCore(options: CoreOptions) {
         collection.type === 'doc'
           ? `invalid frontmatter in ${filePath}`
           : `invalid data in ${filePath}`,
-      )
+      );
     }
 
-    return data as T
+    return data as T;
   }
 
   return {
@@ -188,22 +187,40 @@ export function createCore(options: CoreOptions) {
      * Convenient cache store, reset when config changes
      */
     cache: new Map<string, unknown>(),
+    /**
+     * Collects the collections declared with `fumadocs-mdx/macro`.
+     *
+     * Assigned by the bundler adapter when the macro API is enabled, so that every loader of a
+     * build shares one collector (and hence one evaluation of each macro module).
+     */
+    macro: undefined as MacroCollector | undefined,
+    /** absolute path */
+    get outDir() {
+      return outDir;
+    },
+    /** absolute path */
+    get root() {
+      return root;
+    },
+    /** absolute path */
+    get configPath() {
+      return configPath;
+    },
+    get workspace() {
+      return options.workspace;
+    },
+    get environment() {
+      return options.environment;
+    },
     async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
-      config = await newConfig
-      this.cache.clear()
-      workspaces.clear()
-      plugins = await getPlugins([
-        // postprocessPlugin(),
-        options.plugins,
-        config.global.plugins,
-      ])
-
-      console.log('[mdx] plugins')
+      config = await newConfig;
+      this.cache.clear();
+      workspaces.clear();
+      plugins = await getPlugins([postprocessPlugin(), options.plugins, config.global.plugins]);
 
       for (const plugin of plugins) {
-        // console.log(plugin['index-file'])
-        const out = await plugin.config?.call(this.getPluginContext(), config)
-        if (out) config = out
+        const out = await plugin.config?.call(this.getPluginContext(), config);
+        if (out) config = out;
       }
 
       // only support workspaces with max depth 1
@@ -212,104 +229,101 @@ export function createCore(options: CoreOptions) {
           Object.entries(config.workspaces).map(async ([name, workspace]) => {
             const core = createCore({
               ...options,
-              outDir: path.join(options.outDir, name),
+              outDir: path.join(outDir, name),
               workspace: {
                 name,
                 parent: this,
                 dir: workspace.dir,
               },
-            })
-            await core.init({ config: workspace.config })
-            workspaces.set(name, core)
+            });
+            await core.init({ config: workspace.config });
+            workspaces.set(name, core);
           }),
-        )
+        );
       }
     },
     getWorkspaces() {
-      return workspaces
-    },
-    getOptions() {
-      return options
+      return workspaces;
     },
     getConfig(): LoadedConfig {
-      return config
+      return config;
     },
     /**
      * The file path of compiled config file, the file may not exist (e.g. on Vite, or still compiling)
      */
     getCompiledConfigPath(): string {
-      return path.join(options.outDir, 'source.config.mjs')
+      return path.join(outDir, 'source.config.mjs');
     },
     getPlugins() {
-      return plugins
+      return plugins;
     },
     getCollections(): CollectionItem[] {
-      return Array.from(config.collections.values())
+      return Array.from(config.collections.values());
     },
     getCollection(name: string): CollectionItem | undefined {
-      return config.collections.get(name)
+      return config.collections.get(name);
     },
     getPluginContext(): PluginContext {
       return {
         core: this,
-      }
+      };
     },
     async initServer(server: ServerContext): Promise<void> {
-      const ctx = this.getPluginContext()
+      const ctx = this.getPluginContext();
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(ctx, server)
+        await plugin.configureServer?.call(ctx, server);
       }
       for (const workspace of workspaces.values()) {
-        await workspace.initServer(server)
+        await workspace.initServer(server);
       }
     },
     async emit(emitOptions: EmitOptions = {}): Promise<EmitOutput> {
-      const { filterPlugin, filterWorkspace, write = false } = emitOptions
-      const start = performance.now()
-      const ctx = this.getPluginContext()
-      const added = new Set<string>()
+      const { filterPlugin, filterWorkspace, write = false } = emitOptions;
+      const start = performance.now();
+      const ctx = this.getPluginContext();
+      const added = new Set<string>();
       const out: EmitOutput = {
         entries: [],
         workspaces: {},
-      }
+      };
 
       for (const li of await Promise.all(
         plugins.map((plugin) => {
-          if ((filterPlugin && !filterPlugin(plugin)) || !plugin.emit) return
-          return plugin.emit.call(ctx)
+          if ((filterPlugin && !filterPlugin(plugin)) || !plugin.emit) return;
+          return plugin.emit.call(ctx);
         }),
       )) {
-        if (!li) continue
+        if (!li) continue;
         for (const item of li) {
-          if (added.has(item.path)) continue
-          out.entries.push(item)
-          added.add(item.path)
+          if (added.has(item.path)) continue;
+          out.entries.push(item);
+          added.add(item.path);
         }
       }
 
       if (write) {
         await Promise.all(
           out.entries.map(async (entry) => {
-            const file = path.join(options.outDir, entry.path)
+            const file = path.join(outDir, entry.path);
 
-            await fs.mkdir(path.dirname(file), { recursive: true })
-            await fs.writeFile(file, entry.content)
+            await fs.mkdir(path.dirname(file), { recursive: true });
+            await fs.writeFile(file, entry.content);
           }),
-        )
+        );
 
         console.log(
           options.workspace
             ? `[MDX: ${options.workspace.name}] generated files in ${performance.now() - start}ms`
             : `[MDX] generated files in ${performance.now() - start}ms`,
-        )
+        );
       }
 
       for (const [name, workspace] of workspaces) {
-        if (filterWorkspace && !filterWorkspace(name)) continue
-        out.workspaces[name] = (await workspace.emit(emitOptions)).entries
+        if (filterWorkspace && !filterWorkspace(name)) continue;
+        out.workspaces[name] = (await workspace.emit(emitOptions)).entries;
       }
 
-      return out
+      return out;
     },
     async transformMeta(
       options: TransformOptions<MetaCollectionItem>,
@@ -318,15 +332,14 @@ export function createCore(options: CoreOptions) {
       const ctx = {
         ...this.getPluginContext(),
         ...options,
-      }
+      };
 
-      data = await transformMetadata(options, data)
+      data = await transformMetadata(options, data);
       for (const plugin of plugins) {
-        if (plugin.meta?.transform)
-          data = (await plugin.meta.transform.call(ctx, data)) ?? data
+        if (plugin.meta?.transform) data = (await plugin.meta.transform.call(ctx, data)) ?? data;
       }
 
-      return data
+      return data;
     },
     async transformFrontmatter(
       options: TransformOptions<DocCollectionItem>,
@@ -335,15 +348,14 @@ export function createCore(options: CoreOptions) {
       const ctx = {
         ...this.getPluginContext(),
         ...options,
-      }
+      };
 
-      data = await transformMetadata(options, data)
+      data = await transformMetadata(options, data);
       for (const plugin of plugins) {
-        if (plugin.doc?.frontmatter)
-          data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data
+        if (plugin.doc?.frontmatter) data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data;
       }
 
-      return data
+      return data;
     },
     async transformVFile(
       options: TransformOptions<DocCollectionItem>,
@@ -352,16 +364,67 @@ export function createCore(options: CoreOptions) {
       const ctx = {
         ...this.getPluginContext(),
         ...options,
-      }
+      };
 
       for (const plugin of plugins) {
-        if (plugin.doc?.vfile)
-          file = (await plugin.doc.vfile.call(ctx, file)) ?? file
+        if (plugin.doc?.vfile) file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
       }
 
-      return file
+      return file;
     },
+  };
+}
+
+/**
+ * @returns the doc collection of a `doc`/`docs` collection, `undefined` for `meta`
+ */
+function docCollectionOf(collection: CollectionItem): DocCollectionItem | undefined {
+  switch (collection.type) {
+    case 'doc':
+      return collection;
+    case 'docs':
+      return collection.docs;
   }
 }
 
-export type Core = ReturnType<typeof createCore>
+function postprocessPlugin(): Plugin {
+  const LinkReferenceTypes = `{
+  /**
+   * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
+   */
+  extractedReferences: import("fumadocs-mdx").ExtractedReference[];
+}`;
+
+  const LastModifiedTypes = `{
+  /**
+   * Last modified date of document file, obtained from version control.
+   */
+  lastModified?: Date;
+}`;
+
+  return {
+    'index-file': {
+      generateTypeConfig() {
+        const lines: string[] = [];
+        lines.push('{');
+        lines.push('  DocData: {');
+        for (const collection of this.core.getCollections()) {
+          const docs = docCollectionOf(collection);
+          if (!docs) continue;
+
+          const extras: string[] = [];
+          if (docs.postprocess?.extractLinkReferences) extras.push(LinkReferenceTypes);
+          if (docs.lastModified) extras.push(LastModifiedTypes);
+          if (extras.length === 0) continue;
+
+          lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2));
+        }
+        lines.push('  }');
+        lines.push('}');
+        return lines.join('\n');
+      },
+    },
+  };
+}
+
+export type Core = ReturnType<typeof createCore>;

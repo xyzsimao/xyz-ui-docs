@@ -1,0 +1,19 @@
+{
+  "name": "cn",
+  "files": [
+    {
+      "type": "lib",
+      "path": "utils/cn.ts",
+      "content": "export { cn } from 'cnfast';\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "cnfast": "^0.1.0"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,25 @@
+export type Translations = {
+  "Default(schema UI)": string;
+  "Deprecated(schema UI)": string;
+  "Enter Property Name(playground)": string;
+  "Enter value(playground)": string;
+  "Example(schema UI)": string;
+  "Filter Properties(schema UI)": string;
+  "Format(schema UI)": string;
+  "Items(schema UI)": string;
+  "Length(schema UI)": string;
+  "Match(schema UI)": string;
+  "Multiple Of(schema UI)": string;
+  "New Item(playground)": string;
+  "New(playground)": string;
+  "No property matching(schema UI)": string;
+  "Properties(schema UI)": string;
+  "Range(schema UI)": string;
+  "Remove Item(playground)(aria-label)": string;
+  "Select(playground)": string;
+  "Selected(playground)": string;
+  "Show Property(playground)": string;
+  "Unset(playground)": string;
+  "Upload(playground)": string;
+  "Value in(schema UI)": string;
+};

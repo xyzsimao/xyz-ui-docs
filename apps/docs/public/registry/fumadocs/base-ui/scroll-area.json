@@ -1,0 +1,25 @@
+{
+  "name": "scroll-area",
+  "files": [
+    {
+      "type": "ui",
+      "path": "components/ui/scroll-area.tsx",
+      "content": "import { ScrollArea as Primitive } from '@base-ui/react/scroll-area';\nimport * as React from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport function ScrollArea({ children, ...props }: React.ComponentProps<typeof Primitive.Root>) {\n  return (\n    <Primitive.Root {...props}>\n      {children}\n      <Primitive.Corner />\n      <ScrollBar orientation=\"vertical\" />\n    </Primitive.Root>\n  );\n}\n\nexport function ScrollViewport({\n  className,\n  children,\n  ...props\n}: React.ComponentProps<typeof Primitive.Viewport>) {\n  return (\n    <Primitive.Viewport\n      className={(s) =>\n        cn(\n          'size-full rounded-[inherit]',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    >\n      {children}\n    </Primitive.Viewport>\n  );\n}\n\nexport function ScrollBar({\n  className,\n  orientation = 'vertical',\n  ...props\n}: React.ComponentProps<typeof Primitive.Scrollbar>) {\n  return (\n    <Primitive.Scrollbar\n      orientation={orientation}\n      className={(s) =>\n        cn(\n          'flex select-none transition-opacity',\n          !s.hovering && 'opacity-0',\n          orientation === 'vertical' && 'h-full w-1.5',\n          orientation === 'horizontal' && 'h-1.5 flex-col',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    >\n      <Primitive.Thumb className=\"relative flex-1 rounded-full bg-fd-border\" />\n    </Primitive.Scrollbar>\n  );\n}\n\nexport type ScrollAreaProps = Primitive.Root.Props;\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "@base-ui/react": "^1.7.0"
+  },
+  "devDependencies": {}
+}

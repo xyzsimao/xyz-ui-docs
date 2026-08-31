@@ -1,0 +1,29 @@
+{
+  "name": "slots/notebook/container",
+  "files": [
+    {
+      "path": "layouts/notebook/slots/container.tsx",
+      "type": "layout",
+      "target": "<dir>/notebook/slots/container.tsx",
+      "content": "'use client';\n\nimport { cn } from 'local:utils/cn.ts';\nimport { type CSSProperties, useEffect, useState, type ComponentProps } from 'react';\nimport { useNotebookLayout } from 'local:<dir>/notebook/client.tsx';\n\nexport function Container(props: ComponentProps<'div'>) {\n  const {\n    props: { nav },\n    slots,\n  } = useNotebookLayout();\n  const pageCol =\n    'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';\n  const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};\n  const [previousCollapsed, setPreviousCollapsed] = useState(collapsed);\n  const isCollapseChanged = previousCollapsed !== collapsed;\n\n  // will only set data attribute for an instant\n  useEffect(() => {\n    if (isCollapseChanged) setPreviousCollapsed(collapsed);\n  }, [collapsed, isCollapseChanged]);\n\n  return (\n    <div\n      id=\"nd-notebook-layout\"\n      data-sidebar-collapsed={collapsed}\n      data-column-changed={isCollapseChanged}\n      {...props}\n      style={\n        {\n          gridTemplate:\n            nav?.mode === 'top'\n              ? `\". header header header .\"\n\"sidebar sidebar toc-popover toc-popover .\"\n\"sidebar sidebar main toc .\" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`\n              : `\"sidebar sidebar header header .\"\n\"sidebar sidebar toc-popover toc-popover .\"\n\"sidebar sidebar main toc .\" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`,\n          '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',\n          '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',\n          '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',\n          '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',\n          ...props.style,\n        } as CSSProperties\n      }\n      className={cn(\n        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] data-[column-changed=true]:transition-[grid-template-columns]',\n        props.className,\n      )}\n    >\n      {props.children}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/notebook"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null
+  },
+  "devDependencies": {}
+}

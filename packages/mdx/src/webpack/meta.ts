@@ -1,20 +1,20 @@
-import { type LoaderContext } from 'webpack'
-import { toWebpack, type WebpackLoader } from '@/loaders/adapter'
-import { createStandaloneConfigLoader } from '@/loaders/config'
-import { createMetaLoader } from '@/loaders/meta'
-import { getCore, type WebpackLoaderOptions } from '@/webpack'
+import { LoaderDefinitionFunction } from 'webpack';
+import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
+import { createStandaloneConfigLoader } from '@/loaders/config';
+import { createMetaLoader } from '@/loaders/meta';
+import { getCore, type WebpackLoaderOptions } from '@/webpack';
 
-let instance: WebpackLoader | undefined
+const instances = new Map<'json' | 'js', WebpackLoader>();
 
-export default async function loader(
-  this: LoaderContext<WebpackLoaderOptions>,
-  source: string,
-  callback: LoaderContext<WebpackLoaderOptions>['callback'],
-): Promise<void> {
-  const options = this.getOptions()
-  this.cacheable(true)
-  this.addDependency(options.absoluteCompiledConfigPath)
+const loader: LoaderDefinitionFunction<WebpackLoaderOptions> = function (source) {
+  const callback = this.async();
+  const options = this.getOptions();
+  this.cacheable(true);
+  this.addDependency(options.compiledConfigPath);
 
+  // TODO: output json directly when Turbopack supports output format other than JavaScript.
+  const jsonOutput = options.type === 'turbopack' ? 'js' : 'json';
+  let instance = instances.get(jsonOutput);
   if (!instance) {
     instance = toWebpack(
       createMetaLoader(
@@ -24,12 +24,15 @@ export default async function loader(
           mode: options.isDev ? 'dev' : 'production',
         }),
         {
-          json: 'json',
+          json: jsonOutput,
           yaml: 'js',
         },
       ),
-    )
+    );
+    instances.set(jsonOutput, instance);
   }
 
-  await instance.call(this, source, callback)
-}
+  void instance.call(this, source, callback);
+};
+
+export default loader;

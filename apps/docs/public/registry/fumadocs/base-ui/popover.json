@@ -1,0 +1,25 @@
+{
+  "name": "popover",
+  "files": [
+    {
+      "type": "ui",
+      "path": "components/ui/popover.tsx",
+      "content": "'use client';\nimport { Popover as Primitive } from '@base-ui/react/popover';\nimport * as React from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport const Popover = Primitive.Root;\n\nexport const PopoverTrigger = Primitive.Trigger;\n\nexport function PopoverContent({\n  className,\n  align = 'center',\n  sideOffset = 4,\n  ...props\n}: React.ComponentProps<typeof Primitive.Popup> &\n  Pick<Primitive.Positioner.Props, 'sideOffset' | 'align'>) {\n  return (\n    <Primitive.Portal>\n      <Primitive.Positioner align={align} side=\"bottom\" sideOffset={sideOffset} className=\"z-50\">\n        <Primitive.Popup\n          className={(s) =>\n            cn(\n              'z-50 origin-(--transform-origin) overflow-y-auto max-h-(--available-height) min-w-[240px] w-(--anchor-width) max-w-[98vw] rounded-xl border bg-fd-popover/60 backdrop-blur-lg p-2 text-sm text-fd-popover-foreground shadow-lg focus-visible:outline-none data-closed:animate-fd-popover-out data-open:animate-fd-popover-in',\n              typeof className === 'function' ? className(s) : className,\n            )\n          }\n          {...props}\n        />\n      </Primitive.Positioner>\n    </Primitive.Portal>\n  );\n}\n\nexport const PopoverClose = Primitive.Close;\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "@base-ui/react": "^1.7.0"
+  },
+  "devDependencies": {}
+}

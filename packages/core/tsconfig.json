@@ -1,11 +1,10 @@
 {
-  "extends": "typescript-config/react-library.json",
-  "include": ["**/*.ts", "**/*.tsx", "**/*.mdx"],
+  "extends": "tsconfig/react-library.json",
   "compilerOptions": {
-    "module": "NodeNext",
     "paths": {
       "@/*": ["./src/*"]
     },
+    "types": ["remark-directive", "hast", "mdast", "node"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

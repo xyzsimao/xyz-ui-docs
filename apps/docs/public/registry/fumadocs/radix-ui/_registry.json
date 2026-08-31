@@ -1,0 +1,192 @@
+{
+  "indexes": [
+    {
+      "name": "accordion"
+    },
+    {
+      "name": "github-info",
+      "description": "A card to display GitHub repo info"
+    },
+    {
+      "name": "banner"
+    },
+    {
+      "name": "callout"
+    },
+    {
+      "name": "card"
+    },
+    {
+      "name": "codeblock"
+    },
+    {
+      "name": "files"
+    },
+    {
+      "name": "heading"
+    },
+    {
+      "name": "image-zoom",
+      "description": "Zoomable Image"
+    },
+    {
+      "name": "inline-toc"
+    },
+    {
+      "name": "steps"
+    },
+    {
+      "name": "tabs"
+    },
+    {
+      "name": "type-table"
+    },
+    {
+      "name": "ai/page-actions",
+      "description": "Common page actions"
+    }
+  ],
+  "unlistedIndexes": [
+    {
+      "name": "urls"
+    },
+    {
+      "name": "cn"
+    },
+    {
+      "name": "merge-refs"
+    },
+    {
+      "name": "toc"
+    },
+    {
+      "name": "slots/docs/container"
+    },
+    {
+      "name": "slots/docs/header"
+    },
+    {
+      "name": "slots/docs/sidebar"
+    },
+    {
+      "name": "slots/home/container"
+    },
+    {
+      "name": "slots/home/header"
+    },
+    {
+      "name": "slots/flux/container"
+    },
+    {
+      "name": "slots/flux/sidebar"
+    },
+    {
+      "name": "slots/flux/tab-dropdown"
+    },
+    {
+      "name": "slots/notebook/container"
+    },
+    {
+      "name": "slots/notebook/header"
+    },
+    {
+      "name": "slots/notebook/sidebar"
+    },
+    {
+      "name": "slots/glass/header"
+    },
+    {
+      "name": "slots/glass/sidebar"
+    },
+    {
+      "name": "slots/shared/language-select"
+    },
+    {
+      "name": "slots/shared/search-trigger"
+    },
+    {
+      "name": "slots/shared/theme-switch"
+    },
+    {
+      "name": "slots/docs/page/breadcrumb"
+    },
+    {
+      "name": "slots/docs/page/container"
+    },
+    {
+      "name": "slots/docs/page/footer"
+    },
+    {
+      "name": "slots/docs/page/toc"
+    },
+    {
+      "name": "slots/flux/page/breadcrumb"
+    },
+    {
+      "name": "slots/flux/page/container"
+    },
+    {
+      "name": "slots/flux/page/footer"
+    },
+    {
+      "name": "slots/flux/page/toc"
+    },
+    {
+      "name": "slots/glass/page/breadcrumb"
+    },
+    {
+      "name": "slots/glass/page/footer"
+    },
+    {
+      "name": "slots/glass/page/toc"
+    },
+    {
+      "name": "slots/notebook/page/breadcrumb"
+    },
+    {
+      "name": "slots/notebook/page/container"
+    },
+    {
+      "name": "slots/notebook/page/footer"
+    },
+    {
+      "name": "slots/notebook/page/toc"
+    },
+    {
+      "name": "layouts/sidebar"
+    },
+    {
+      "name": "layouts/shared"
+    },
+    {
+      "name": "layouts/docs"
+    },
+    {
+      "name": "layouts/flux"
+    },
+    {
+      "name": "layouts/notebook"
+    },
+    {
+      "name": "layouts/glass"
+    },
+    {
+      "name": "layouts/glass/layout-tabs"
+    },
+    {
+      "name": "layouts/home"
+    },
+    {
+      "name": "button"
+    },
+    {
+      "name": "popover"
+    },
+    {
+      "name": "scroll-area"
+    },
+    {
+      "name": "collapsible"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "slots/home/container",
+  "files": [
+    {
+      "path": "layouts/home/slots/container.tsx",
+      "type": "layout",
+      "target": "<dir>/home/slots/container.tsx",
+      "content": "'use client';\n\nimport type { ComponentProps } from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport function Container(props: ComponentProps<'main'>) {\n  return (\n    <main\n      id=\"nd-home-layout\"\n      {...props}\n      className={cn('flex flex-1 flex-col [--fd-layout-width:1400px]', props.className)}\n    />\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null
+  },
+  "devDependencies": {}
+}

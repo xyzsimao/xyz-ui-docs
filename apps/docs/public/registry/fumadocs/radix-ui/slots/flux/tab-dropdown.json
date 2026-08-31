@@ -1,0 +1,36 @@
+{
+  "name": "slots/flux/tab-dropdown",
+  "files": [
+    {
+      "path": "layouts/flux/slots/tab-dropdown.tsx",
+      "type": "layout",
+      "target": "<dir>/flux/slots/tab-dropdown.tsx",
+      "content": "'use client';\nimport { Check, ChevronsUpDown } from 'lucide-react';\nimport { type ComponentProps, type ReactNode, useMemo, useState } from 'react';\nimport Link from 'fumadocs-core/link';\nimport { usePathname } from 'fumadocs-core/framework';\nimport { cn } from 'local:utils/cn.ts';\nimport { Popover, PopoverContent, PopoverTrigger } from 'local:components/ui/popover.tsx';\nimport { AnimatePresence, motion } from 'motion/react';\nimport { isLayoutTabActive, type LayoutTab } from 'local:<dir>/shared/index.tsx';\n\nexport interface TabDropdownProps extends ComponentProps<'button'> {\n  placeholder?: ReactNode;\n  tabs: LayoutTab[];\n}\n\nexport function TabDropdown({ tabs, placeholder, className, ...props }: TabDropdownProps) {\n  const [open, setOpen] = useState(false);\n  const pathname = usePathname();\n  const selectedIdx = useMemo(() => {\n    return tabs.findLastIndex((item) => isLayoutTabActive(item, pathname));\n  }, [tabs, pathname]);\n  const selected = selectedIdx !== -1 ? tabs[selectedIdx] : undefined;\n\n  const onClick = () => {\n    setOpen(false);\n  };\n\n  const item = selected ? (\n    <>\n      <div className=\"size-4.5 shrink-0 empty:hidden\">{selected.icon}</div>\n      <p className=\"font-medium\">{selected.title}</p>\n    </>\n  ) : (\n    placeholder\n  );\n\n  return (\n    <Popover open={open} onOpenChange={setOpen}>\n      {item && (\n        <PopoverTrigger\n          className={cn(\n            'flex items-center gap-2 rounded-xl overflow-hidden p-1.5 border shadow-sm text-sm text-start transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',\n            className,\n          )}\n          {...props}\n        >\n          <AnimatePresence mode=\"popLayout\">\n            <motion.span\n              key={selectedIdx}\n              className=\"flex w-full min-w-0 overflow-hidden items-center text-nowrap gap-1.5\"\n              initial={{\n                opacity: 0,\n                y: '100%',\n              }}\n              animate={{\n                opacity: 1,\n                y: 0,\n              }}\n              exit={{\n                opacity: 0,\n                y: '-100%',\n              }}\n            >\n              {item}\n            </motion.span>\n          </AnimatePresence>\n\n          <ChevronsUpDown className=\"shrink-0 ms-auto size-4 text-fd-muted-foreground\" />\n        </PopoverTrigger>\n      )}\n      <PopoverContent\n        align=\"start\"\n        className=\"flex flex-col gap-1 max-w-svw p-1 fd-scroll-container\"\n      >\n        {tabs.map((item, i) => {\n          const isActive = i === selectedIdx;\n          if (!isActive && item.unlisted) return;\n\n          return (\n            <Link\n              key={item.url}\n              href={item.url}\n              onClick={onClick}\n              {...item.props}\n              className={cn(\n                'flex items-center gap-1.5 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',\n                item.props?.className,\n              )}\n            >\n              <div className=\"shrink-0 mb-auto size-4.5 empty:hidden\">{item.icon}</div>\n              <div>\n                <p className=\"text-sm font-medium leading-none\">{item.title}</p>\n                <p className=\"text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden\">\n                  {item.description}\n                </p>\n              </div>\n\n              <Check\n                className={cn(\n                  'shrink-0 ms-auto size-3.5 text-fd-primary',\n                  !isActive && 'invisible',\n                )}\n              />\n            </Link>\n          );\n        })}\n      </PopoverContent>\n    </Popover>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "popover"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/shared"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "motion": "^13.1.1"
+  },
+  "devDependencies": {}
+}

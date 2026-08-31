@@ -1,14 +1,13 @@
-import { fileURLToPath } from 'node:url'
-import * as path from 'node:path'
-import { expect, test } from 'vitest'
-import { z } from 'zod'
-import { ValidationError } from '@/utils/validation'
-import { defineCollections, defineConfig } from '@/config'
-import { xyzMatter } from '@/utils/xyz-matter'
-import { buildConfig } from '@/config/build'
-import { createCore } from '@/core'
-import indexFile from '@/plugins/index-file'
-import lastModified from '@/plugins/last-modified'
+import { fileURLToPath } from 'node:url';
+import * as path from 'node:path';
+import { expect, test } from 'vitest';
+import { z } from 'zod';
+import { ValidationError } from '@/utils/validation';
+import { defineCollections, defineConfig, defineDocs } from '@/config';
+import { buildConfig } from '@/config/build';
+import { createCore } from '@/core';
+import indexFile from '@/plugins/index-file';
+import lastModified from '@/plugins/last-modified';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -18,7 +17,7 @@ test('format errors', async () => {
       value: z.number(),
     }),
     value: z.string().max(4),
-  })
+  });
 
   const result = await schema['~standard'].validate({
     text: 4,
@@ -26,10 +25,10 @@ test('format errors', async () => {
       value: 'string',
     },
     value: 'asfdfsdfsdfsd',
-  })
+  });
 
   if (result.issues) {
-    const error = new ValidationError('in index.mdx:', result.issues)
+    const error = new ValidationError('in index.mdx:', result.issues);
 
     expect(error.toString()).toMatchInlineSnapshot(`
       "Error: in index.mdx::
@@ -37,14 +36,16 @@ test('format errors', async () => {
         obj,key: Invalid input: expected number, received undefined
         obj,value: Invalid input: expected number, received string
         value: Too big: expected string to have <=4 characters"
-    `)
+    `);
   }
-})
+});
 
-const baseDir = path.dirname(fileURLToPath(import.meta.url))
+const baseDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.join(baseDir, '../../..');
+const fixtureDir = path.join(baseDir, 'fixtures');
 const cases: {
-  name: string
-  config: Record<string, unknown>
+  name: string;
+  config: Record<string, unknown>;
 }[] = [
   {
     name: 'sync',
@@ -115,6 +116,17 @@ const cases: {
     },
   },
   {
+    name: 'dynamic-docs',
+    config: {
+      docs: defineDocs({
+        dir: path.join(baseDir, './fixtures/generate-index-docs'),
+        docs: {
+          dynamic: true,
+        },
+      }),
+    },
+  },
+  {
     name: 'workspace',
     config: {
       docs: defineCollections({
@@ -137,91 +149,55 @@ const cases: {
       }),
     },
   },
-]
+];
 
 for (const { name, config } of cases) {
   test(`generate JS index file: ${name}`, async () => {
-    const core = createCore({
-      configPath: path.relative(
-        process.cwd(),
-        path.join(baseDir, './fixtures/config.ts')
-      ),
-      environment: 'test',
-      outDir: path.relative(process.cwd(), path.join(baseDir, './fixtures')),
-      plugins: [indexFile()],
-    })
+    const prevCwd = process.cwd();
+    process.chdir(repoRoot);
+    try {
+      const core = createCore({
+        configPath: path.relative(repoRoot, path.join(fixtureDir, 'config.ts')),
+        environment: 'test',
+        outDir: path.relative(repoRoot, fixtureDir),
+        plugins: [indexFile()],
+      });
 
-    await core.init({
-      config: buildConfig(config),
-    })
+      await core.init({
+        config: buildConfig(config, repoRoot),
+      });
 
-    const { entries, workspaces } = await core.emit()
-    for (const [name, workspace] of Object.entries(workspaces)) {
-      for (const item of workspace) {
-        item.path = path.join(name, item.path)
-        entries.push(item)
+      const { entries, workspaces } = await core.emit();
+      for (const [name, workspace] of Object.entries(workspaces)) {
+        for (const item of workspace) {
+          item.path = path.join(name, item.path);
+          entries.push(item);
+        }
       }
-    }
-    const markdown = entries
-      .map(
-        (entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``
-      )
-      .join('\n\n')
+      const markdown = entries
+        .map((entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``)
+        .join('\n\n');
 
-    await expect(markdown).toMatchFileSnapshot(
-      `./fixtures/index-${name}.output.md`
-    )
-  })
+      if (name === 'dynamic') {
+        expect(markdown).toContain(`import path from 'node:path';`);
+        expect(markdown).toContain(
+          'create.doc("docs", "packages/mdx/test/fixtures/generate-index", [',
+        );
+        expect(markdown).toContain(
+          'create.doc("blogs", "packages/mdx/test/fixtures/generate-index", [',
+        );
+      }
+
+      if (name === 'dynamic-docs') {
+        expect(markdown).toContain(`import path from 'node:path';`);
+        expect(markdown).toMatch(
+          /create\.docs\("docs", "packages\/mdx\/test\/fixtures\/generate-index-docs", [\s\S]+, \[/,
+        );
+      }
+
+      await expect(markdown).toMatchFileSnapshot(`./fixtures/index-${name}.output.md`);
+    } finally {
+      process.chdir(prevCwd);
+    }
+  });
 }
-
-test('parse frontmatter', () => {
-  expect(
-    xyzMatter(
-      '---\ntitle: hello world\ndescription: I love xyzdocs\n---\nwow looks cool.'
-    )
-  ).toMatchInlineSnapshot(`
-    {
-      "content": "wow looks cool.",
-      "data": {
-        "description": "I love xyzdocs",
-        "title": "hello world",
-      },
-      "matter": "---
-    title: hello world
-    description: I love xyzdocs
-    ---
-    ",
-    }
-  `)
-
-  expect(
-    xyzMatter(
-      '---\r\ntitle: hello world\r\ndescription: I love xyzdocs\r\n---\r\nwow looks cool.'
-    )
-  ).toMatchInlineSnapshot(`
-    {
-      "content": "wow looks cool.",
-      "data": {
-        "description": "I love xyzdocs",
-        "title": "hello world",
-      },
-      "matter": "---
-    title: hello world
-    description: I love xyzdocs
-    ---
-    ",
-    }
-  `)
-
-  expect(xyzMatter('--- \ntitle: hello world\r\n---\r\nwow looks cool.'))
-    .toMatchInlineSnapshot(`
-    {
-      "content": "---
-    title: hello world
-    ---
-    wow looks cool.",
-      "data": {},
-      "matter": "",
-    }
-  `)
-})

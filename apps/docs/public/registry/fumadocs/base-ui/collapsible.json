@@ -1,0 +1,25 @@
+{
+  "name": "collapsible",
+  "files": [
+    {
+      "type": "ui",
+      "path": "components/ui/collapsible.tsx",
+      "content": "'use client';\nimport { Collapsible as Primitive } from '@base-ui/react/collapsible';\nimport type { ComponentProps } from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport const Collapsible = Primitive.Root;\n\nexport const CollapsibleTrigger = Primitive.Trigger;\n\nexport function CollapsibleContent({\n  children,\n  className,\n  ...props\n}: ComponentProps<typeof Primitive.Panel>) {\n  return (\n    <Primitive.Panel\n      {...props}\n      className={(s) =>\n        cn(\n          \"overflow-hidden [&[hidden]:not([hidden='until-found'])]:hidden h-(--collapsible-panel-height) transition-[height,opacity] data-starting-style:opacity-0 data-starting-style:h-0 data-ending-style:h-0 data-ending-style:opacity-0\",\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n    >\n      {children}\n    </Primitive.Panel>\n  );\n}\n\nexport type CollapsibleProps = Primitive.Root.Props;\nexport type CollapsibleContentProps = Primitive.Panel.Props;\nexport type CollapsibleTriggerProps = Primitive.Trigger.Props;\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "@base-ui/react": "^1.7.0"
+  },
+  "devDependencies": {}
+}

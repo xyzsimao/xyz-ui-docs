@@ -1,9 +1,13 @@
-import type { Core } from '@/core'
-import fs from 'node:fs/promises'
+import { loadConfig } from '@/config/load-from-file';
+import { buildConfig as buildEmptyConfig } from '@/config/build';
+import type { Core } from '@/core';
+import fs from 'node:fs/promises';
 
 export interface ConfigLoader {
-  getCore(): Promise<Core>
+  getCore(): Promise<Core>;
 }
+
+type Hash = 'static' | 'missing' | number;
 
 export function createStandaloneConfigLoader({
   core,
@@ -13,50 +17,50 @@ export function createStandaloneConfigLoader({
   /**
    * core (not initialized)
    */
-  core: Core
-  buildConfig: boolean
+  core: Core;
+  buildConfig: boolean;
   /**
    * In dev mode, the config file is dynamically re-loaded when it's updated.
    */
-  mode: 'dev' | 'production'
+  mode: 'dev' | 'production';
 }): ConfigLoader {
   let prev:
     | {
-        hash: string
-        init: Promise<void>
+        hash: Hash;
+        init: Promise<void>;
       }
-    | undefined
+    | undefined;
 
-  async function getConfigHash(): Promise<string> {
-    if (mode === 'production') return 'static'
+  async function getConfigHash(): Promise<Hash> {
+    if (mode === 'production') return 'static';
 
-    const stats = await fs.stat(core.getOptions().configPath).catch(() => {
-      throw new Error('Cannot find config file')
-    })
+    const stats = await fs.stat(core.configPath).catch(() => undefined);
+    return stats ? stats.mtime.getTime() : 'missing';
+  }
 
-    return stats.mtime.getTime().toString()
+  async function load(hash: Hash) {
+    // the config file is optional
+    if (hash === 'missing') return buildEmptyConfig({}, process.cwd());
+
+    return (await loadConfig(core, buildConfig)).config;
   }
 
   return {
     async getCore() {
-      const hash = await getConfigHash()
+      const hash = await getConfigHash();
       if (!prev || hash !== prev.hash) {
         prev = {
           hash,
-          init: (async () => {
-            const { loadConfig } = await import('../config/load-from-file')
-
-            await core.init({
-              config: loadConfig(core, buildConfig),
-            })
-          })(),
-        }
+          init: core.init({
+            config: load(hash),
+          }),
+        };
       }
 
-      await prev.init
-      return core
+      await prev.init;
+      return core;
     },
-  }
+  };
 }
 
 /**
@@ -65,7 +69,7 @@ export function createStandaloneConfigLoader({
 export function createIntegratedConfigLoader(core: Core): ConfigLoader {
   return {
     async getCore() {
-      return core
+      return core;
     },
-  }
+  };
 }

@@ -1,5 +1,5 @@
 {
-  "extends": "typescript-config/nextjs.json",
+  "extends": "tsconfig/nextjs.json",
   "compilerOptions": {
     "strictNullChecks": false,
     "jsx": "react-jsx",
@@ -11,7 +11,7 @@
       "@/*": [
         "./*"
       ],
-      "xyzdocs-mdx:collections/*": [
+      "fumadocs-mdx:collections/*": [
         ".source/*"
       ]
     },

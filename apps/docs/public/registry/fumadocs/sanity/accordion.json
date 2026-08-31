@@ -1,0 +1,26 @@
+{
+  "name": "accordion",
+  "files": [
+    {
+      "type": "lib",
+      "path": "accordion.ts",
+      "target": "<dir>/sanity/accordion.ts",
+      "content": "import { defineType, defineField } from 'sanity';\n\nexport const accordion = defineType({\n  name: 'accordion',\n  type: 'object',\n  title: 'Accordion',\n  fields: [\n    defineField({\n      name: 'title',\n      title: 'Title',\n      type: 'blockContent',\n      validation: (r) => r.required(),\n    }),\n    defineField({\n      name: 'id',\n      title: 'Anchor ID',\n      type: 'string',\n    }),\n    defineField({\n      name: 'value',\n      title: 'Value',\n      type: 'string',\n    }),\n    defineField({\n      name: 'body',\n      title: 'Body',\n      type: 'blockContent',\n    }),\n  ],\n  preview: {\n    select: {\n      title: 'title',\n      subtitle: 'body',\n    },\n  },\n});\n\nexport const accordions = defineType({\n  name: 'accordions',\n  type: 'object',\n  title: 'Accordions',\n  fields: [\n    defineField({\n      name: 'type',\n      title: 'Type',\n      type: 'string',\n      initialValue: 'single',\n      options: {\n        list: [\n          { title: 'Single', value: 'single' },\n          { title: 'Multiple', value: 'multiple' },\n        ],\n      },\n    }),\n    defineField({\n      name: 'items',\n      title: 'Items',\n      type: 'array',\n      of: [{ type: 'accordion' }],\n    }),\n  ],\n  preview: {\n    select: {\n      type: 'type',\n    },\n    prepare({ type }) {\n      return {\n        title: 'Accordions',\n        subtitle: type,\n      };\n    },\n  },\n});\n"
+    },
+    {
+      "type": "components",
+      "path": "accordion.component.tsx",
+      "target": "<dir>/sanity/accordion.tsx",
+      "content": "import type {\n  NodeRenderer,\n  PortableTextBlock,\n  PortableTextTypeComponent,\n} from '@portabletext/react';\nimport { Accordion, Accordions } from 'fumadocs-ui/components/accordion';\n\nexport interface AccordionValue {\n  _key?: string;\n  _type: 'accordion';\n  title?: PortableTextBlock[];\n  id?: string;\n  value?: string;\n  body?: PortableTextBlock[];\n}\n\nexport interface AccordionsValue {\n  _type: 'accordions';\n  type?: 'single' | 'multiple';\n  items?: AccordionValue[];\n}\n\nfunction renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {\n  return (\n    blocks?.map((node, index) => renderNode({ node, index, isInline: false, renderNode })) ?? null\n  );\n}\n\nexport const accordionComponents: {\n  accordion: PortableTextTypeComponent<AccordionValue>;\n  accordions: PortableTextTypeComponent<AccordionsValue>;\n} = {\n  accordion({ value, renderNode }) {\n    return (\n      <Accordions>\n        <Accordion\n          title={value.title && renderBlocks(value.title, renderNode)}\n          id={value.id}\n          value={value.value ?? value._key}\n        >\n          {renderBlocks(value.body, renderNode)}\n        </Accordion>\n      </Accordions>\n    );\n  },\n  accordions({ value, renderNode }) {\n    return (\n      <Accordions multiple={value.type === 'multiple'}>\n        {value.items?.map((item) => (\n          <Accordion\n            key={item._key}\n            title={item.title && renderBlocks(item.title, renderNode)}\n            id={item.id}\n            value={item.value ?? item._key}\n          >\n            {renderBlocks(item.body, renderNode)}\n          </Accordion>\n        ))}\n      </Accordions>\n    );\n  },\n};\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "sanity": null,
+    "@portabletext/react": "^8.0.1"
+  },
+  "devDependencies": {}
+}

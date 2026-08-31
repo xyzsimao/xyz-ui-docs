@@ -1,0 +1,24 @@
+{
+  "name": "popover",
+  "files": [
+    {
+      "type": "ui",
+      "path": "components/ui/popover.tsx",
+      "content": "'use client';\nimport * as PopoverPrimitive from '@radix-ui/react-popover';\nimport * as React from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport const Popover = PopoverPrimitive.Root;\n\nexport const PopoverTrigger = PopoverPrimitive.Trigger;\n\nexport function PopoverContent({\n  className,\n  align = 'center',\n  sideOffset = 4,\n  ...props\n}: React.ComponentProps<typeof PopoverPrimitive.Content>) {\n  return (\n    <PopoverPrimitive.Portal>\n      <PopoverPrimitive.Content\n        align={align}\n        sideOffset={sideOffset}\n        side=\"bottom\"\n        className={cn(\n          'z-50 origin-(--radix-popover-content-transform-origin) overflow-y-auto max-h-(--radix-popover-content-available-height) min-w-[240px] max-w-[98vw] rounded-xl border bg-fd-popover/60 backdrop-blur-lg p-2 text-sm text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in',\n          className,\n        )}\n        {...props}\n      />\n    </PopoverPrimitive.Portal>\n  );\n}\n\nexport const PopoverClose = PopoverPrimitive.PopoverClose;\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "@radix-ui/react-popover": "^1.1.23"
+  },
+  "devDependencies": {}
+}

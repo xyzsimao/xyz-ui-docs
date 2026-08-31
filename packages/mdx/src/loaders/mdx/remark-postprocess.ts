@@ -1,40 +1,33 @@
-import type { Processor, Transformer } from 'unified'
-import type { Heading, Root, RootContent } from 'mdast'
-import { visit } from 'unist-util-visit'
-import { toMarkdown } from 'mdast-util-to-markdown'
-import { valueToEstree } from 'estree-util-value-to-estree'
-import { removePosition } from 'unist-util-remove-position'
-import remarkMdx from 'remark-mdx'
-import { flattenNode } from './mdast-utils'
+import type { Processor, Transformer } from 'unified';
+import type { Root, RootContent } from 'mdast';
+import { visit } from 'unist-util-visit';
+import { valueToEstree } from 'estree-util-value-to-estree';
+import { removePosition } from 'unist-util-remove-position';
+import { flattenNode } from './mdast-utils';
+import type { LLMsOptions } from 'fumadocs-core/mdx-plugins';
+import { remarkLLMs } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
-  href: string
+  href: string;
 }
 
 export interface PostprocessOptions {
-  _format: 'md' | 'mdx'
+  _format: 'md' | 'mdx';
 
   /**
    * Properties to export from `vfile.data`
    */
-  valueToExport?: string[]
+  valueToExport?: string[];
 
   /**
    * stringify MDAST and export via `_markdown`.
    */
-  includeProcessedMarkdown?:
-    | boolean
-    | {
-        /**
-         * include heading IDs into the processed markdown.
-         */
-        headingIds?: boolean
-      }
+  includeProcessedMarkdown?: boolean | LLMsOptions;
 
   /**
    * extract link references, export via `extractedReferences`.
    */
-  extractLinkReferences?: boolean
+  extractLinkReferences?: boolean;
 
   /**
    * store MDAST and export via `_mdast`.
@@ -42,8 +35,8 @@ export interface PostprocessOptions {
   includeMDAST?:
     | boolean
     | {
-        removePosition?: boolean
-      }
+        removePosition?: boolean;
+      };
 }
 
 /**
@@ -53,105 +46,78 @@ export interface PostprocessOptions {
 export function remarkPostprocess(
   this: Processor,
   {
-    _format,
     includeProcessedMarkdown = false,
     includeMDAST = false,
     extractLinkReferences = false,
     valueToExport = [],
   }: PostprocessOptions,
 ): Transformer<Root, Root> {
-  let _stringifyProcessor: Processor | undefined
-  const getStringifyProcessor = () => {
-    return (_stringifyProcessor ??=
-      _format === 'mdx'
-        ? this
-        : // force Markdown processor to stringify MDX nodes
-          this().use(remarkMdx).freeze())
-  }
-
   return (tree, file) => {
-    const frontmatter = (file.data.frontmatter ??= {})
+    const frontmatter = (file.data.frontmatter ??= {});
     if (!frontmatter.title) {
       visit(tree, 'heading', (node) => {
         if (node.depth === 1) {
-          frontmatter.title = flattenNode(node)
-          return false
+          frontmatter.title = flattenNode(node);
+          return false;
         }
-      })
+      });
     }
 
-    file.data['mdx-export'] ??= []
+    file.data['mdx-export'] ??= [];
     file.data['mdx-export'].push({
       name: 'frontmatter',
       value: frontmatter,
-    })
+    });
 
     if (extractLinkReferences) {
-      const urls: ExtractedReference[] = []
+      const urls: ExtractedReference[] = [];
 
       visit(tree, 'link', (node) => {
         urls.push({
           href: node.url,
-        })
-        return 'skip'
-      })
+        });
+        return 'skip';
+      });
 
       file.data['mdx-export'].push({
         name: 'extractedReferences',
         value: urls,
-      })
+      });
     }
 
     if (includeProcessedMarkdown) {
-      const { headingIds = true } =
-        typeof includeProcessedMarkdown === 'object'
-          ? includeProcessedMarkdown
-          : {}
-      const processor = getStringifyProcessor()
-      const markdown = toMarkdown(tree, {
-        ...processor.data('settings'),
-        // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
-        extensions: processor.data('toMarkdownExtensions') || [],
-        handlers: {
-          heading: (node: Heading) => {
-            const id = node.data?.hProperties?.id
-            const content = flattenNode(node)
-            return headingIds && id ? `${content} [#${id}]` : content
-          },
-        },
-      })
-
-      file.data['mdx-export'].push({
-        name: '_markdown',
-        value: markdown,
-      })
+      const llms = remarkLLMs.call(
+        this,
+        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,
+      );
+      llms(tree, file, () => undefined);
     }
 
     if (includeMDAST) {
-      const options = includeMDAST === true ? {} : includeMDAST
+      const options = includeMDAST === true ? {} : includeMDAST;
       const mdast = JSON.stringify(
         options.removePosition ? removePosition(structuredClone(tree)) : tree,
-      )
+      );
 
       file.data['mdx-export'].push({
         name: '_mdast',
         value: mdast,
-      })
+      });
     }
 
     for (const { name, value } of file.data['mdx-export']) {
-      tree.children.unshift(getMdastExport(name, value))
+      tree.children.unshift(getMdastExport(name, value));
     }
 
     // reset the data to reduce memory usage
-    file.data['mdx-export'] = []
+    file.data['mdx-export'] = [];
 
     for (const name of valueToExport) {
-      if (!(name in file.data)) continue
+      if (!(name in file.data)) continue;
 
-      tree.children.unshift(getMdastExport(name, file.data[name]))
+      tree.children.unshift(getMdastExport(name, file.data[name]));
     }
-  }
+  };
 }
 
 /**
@@ -191,5 +157,5 @@ function getMdastExport(name: string, value: unknown): RootContent {
         ],
       },
     },
-  }
+  };
 }

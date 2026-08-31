@@ -1,17 +1,11 @@
 @import './lib/base.css';
-@import './lib/default-colors.css';
-/* @import './lib/shiki.css';
+@import './lib/shiki.css';
 
 @plugin '../dist/tailwind/typography.js';
 
-@import './generated/flux.css';
 @import './generated/docs.css';
-
+@import './generated/home.css';
 @import './generated/notebook.css';
-@import './generated/shared.css'; */
+@import './generated/flux.css';
 
-@source '../dist/*.js';
-@source '../dist/{components,contexts,provider,utils}/**/*.js';
-@source '../dist/layouts/shared/**/*.js';
-
-@import './layouts/home.css';
+@import './generated/shared.css';

@@ -1,0 +1,103 @@
+{
+  "name": "layouts/notebook",
+  "files": [
+    {
+      "type": "layout",
+      "path": "layouts/notebook/index.tsx",
+      "target": "<dir>/notebook/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/notebook"
+      },
+      "content": "import type * as PageTree from 'fumadocs-core/page-tree';\nimport { type HTMLAttributes, useMemo } from 'react';\nimport type { SidebarProps, SidebarProviderProps } from 'local:<dir>/notebook/slots/sidebar.tsx';\nimport {\n  type GetLayoutTabsOptions,\n  type LayoutTab,\n  type NavOptions,\n  type BaseLayoutProps,\n  getLayoutTabs,\n} from 'local:<dir>/shared/index.tsx';\nimport { type DocsSlots, LayoutBody } from 'local:<dir>/notebook/client.tsx';\n\nexport interface DocsLayoutProps extends Omit<BaseLayoutProps, 'nav'> {\n  tree: PageTree.Root;\n  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;\n  tabMode?: 'sidebar' | 'navbar';\n  sidebar?: SidebarOptions;\n  nav?: NavOptions & { mode?: 'top' | 'auto' };\n  containerProps?: HTMLAttributes<HTMLDivElement>;\n  slots?: Partial<DocsSlots>;\n}\n\ninterface SidebarOptions extends SidebarProps, SidebarProviderProps {\n  /**\n   * @deprecated use layout-level `tabs` option instead.\n   */\n  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;\n}\n\nexport function DocsLayout({\n  tree,\n  tabMode = 'sidebar',\n  sidebar: { tabs: defaultTabs, ...sidebarProps } = {},\n  children,\n  tabs = defaultTabs,\n  ...props\n}: DocsLayoutProps) {\n  const resolvedTabs = useMemo(() => {\n    if (Array.isArray(tabs)) {\n      return tabs;\n    }\n    if (typeof tabs === 'object') {\n      return getLayoutTabs(tree, tabs);\n    }\n    if (tabs !== false) {\n      return getLayoutTabs(tree);\n    }\n    return [];\n  }, [tabs, tree]);\n\n  return (\n    <LayoutBody tree={tree} tabs={resolvedTabs} tabMode={tabMode} sidebar={sidebarProps} {...props}>\n      {children}\n    </LayoutBody>\n  );\n}\n\nexport { useNotebookLayout, type DocsSlots } from 'local:<dir>/notebook/client.tsx';\n"
+    },
+    {
+      "type": "layout",
+      "path": "layouts/notebook/client.tsx",
+      "target": "<dir>/notebook/client.tsx",
+      "meta": {
+        "preserveAs": "layouts/notebook"
+      },
+      "content": "'use client';\nimport { type ComponentProps, createContext, type FC, use } from 'react';\nimport { type DocsLayoutProps } from 'local:<dir>/notebook/index.tsx';\nimport { useIsScrollTop } from '@fumadocs/base-ui/utils/use-is-scroll-top';\nimport { type LinkItemType } from 'local:<dir>/shared/index.tsx';\nimport {\n  baseSlots,\n  type BaseSlots,\n  type BaseSlotsProps,\n  type LayoutTab,\n  useLinkItems,\n} from 'local:<dir>/shared/index.tsx';\nimport { TreeContextProvider } from '@fumadocs/base-ui/contexts/tree';\nimport { Container } from 'local:<dir>/notebook/slots/container.tsx';\nimport {\n  Sidebar,\n  SidebarCollapseTrigger,\n  SidebarProvider,\n  SidebarTrigger,\n  useSidebar,\n  type SidebarProps,\n  type SidebarProviderProps,\n} from 'local:<dir>/notebook/slots/sidebar.tsx';\nimport { Header } from 'local:<dir>/notebook/slots/header.tsx';\n\nexport interface DocsSlots extends BaseSlots {\n  container: FC<ComponentProps<'div'>>;\n  header: FC<ComponentProps<'header'>>;\n  sidebar: {\n    provider: FC<SidebarProviderProps>;\n    root: FC<SidebarProps>;\n    trigger: FC<ComponentProps<'button'>>;\n    collapseTrigger: FC<ComponentProps<'button'>>;\n    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (V: boolean) => void };\n  };\n}\n\nconst { useBaseSlots } = baseSlots({\n  useProps() {\n    return useNotebookLayout().props;\n  },\n});\n\ninterface SlotsProps extends BaseSlotsProps<DocsLayoutProps> {\n  sidebar: SidebarProps;\n  tabMode: NonNullable<DocsLayoutProps['tabMode']>;\n  tabs: LayoutTab[];\n}\n\nconst LayoutContext = createContext<{\n  props: SlotsProps;\n  isNavTransparent: boolean;\n  navItems: LinkItemType[];\n  menuItems: LinkItemType[];\n  slots: DocsSlots;\n} | null>(null);\n\nexport function useNotebookLayout() {\n  const context = use(LayoutContext);\n  if (!context)\n    throw new Error(\n      'Please use <DocsPage /> (`fumadocs-ui/layouts/notebook/page`) under <DocsLayout /> (`fumadocs-ui/layouts/notebook`).',\n    );\n  return context;\n}\n\nexport function LayoutBody(\n  props: Omit<DocsLayoutProps, 'tabs'> & {\n    tabs: LayoutTab[];\n  },\n) {\n  const {\n    nav: { enabled: navEnabled = true, transparentMode: navTransparentMode = 'none' } = {},\n    sidebar: { defaultOpenLevel, prefetch, ...sidebarProps } = {},\n    slots: defaultSlots,\n    tabMode = 'sidebar',\n    tabs,\n    tree,\n    containerProps,\n    children,\n  } = props;\n  const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;\n  const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';\n  const { baseSlots, baseProps } = useBaseSlots(props);\n  const linkItems = useLinkItems(props);\n  const slots: DocsSlots = {\n    ...baseSlots,\n    header: defaultSlots?.header ?? Header,\n    container: defaultSlots?.container ?? Container,\n    sidebar: defaultSlots?.sidebar ?? {\n      provider: SidebarProvider,\n      root: Sidebar,\n      trigger: SidebarTrigger,\n      collapseTrigger: SidebarCollapseTrigger,\n      useSidebar,\n    },\n  };\n\n  return (\n    <TreeContextProvider tree={tree}>\n      <LayoutContext\n        value={{\n          props: {\n            tabs,\n            tabMode,\n            sidebar: sidebarProps,\n            ...baseProps,\n          },\n          isNavTransparent,\n          slots,\n          ...linkItems,\n        }}\n      >\n        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>\n          <slots.container {...containerProps}>\n            {navEnabled && <slots.header />}\n            <slots.sidebar.root {...sidebarProps} />\n            {children}\n          </slots.container>\n        </slots.sidebar.provider>\n      </LayoutContext>\n    </TreeContextProvider>\n  );\n}\n"
+    },
+    {
+      "type": "layout",
+      "path": "layouts/notebook/page/index.tsx",
+      "target": "<dir>/notebook/page/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/notebook/page"
+      },
+      "content": "'use client';\nimport {\n  type ComponentProps,\n  createContext,\n  type FC,\n  type ReactNode,\n  use,\n  useEffect,\n  useState,\n} from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { useTranslations } from '@fuma-translate/react';\nimport {\n  TOC,\n  TOCPopover,\n  TOCProvider,\n  type TOCProviderProps,\n  type TOCPopoverProps,\n  type TOCProps,\n} from 'local:<dir>/notebook/page/slots/toc.tsx';\nimport { Footer, type FooterProps } from 'local:<dir>/notebook/page/slots/footer.tsx';\nimport { Breadcrumb, type BreadcrumbProps } from 'local:<dir>/notebook/page/slots/breadcrumb.tsx';\nimport { Container } from 'local:<dir>/notebook/page/slots/container.tsx';\nimport type { TOCItemType } from 'fumadocs-core/toc';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { Edit } from 'lucide-react';\n\nexport interface DocsPageProps extends ComponentProps<'article'> {\n  toc?: TOCItemType[];\n  /**\n   * Extend the page to fill all available space\n   *\n   * @defaultValue false\n   */\n  full?: boolean | undefined;\n  slots?: Partial<DocsPageSlots>;\n\n  footer?: FooterOptions;\n  breadcrumb?: BreadcrumbOptions;\n  tableOfContent?: TableOfContentOptions;\n  tableOfContentPopover?: TableOfContentPopoverOptions;\n}\n\ninterface BreadcrumbOptions extends BreadcrumbProps {\n  enabled?: boolean;\n  /**\n   * @deprecated use `slots.breadcrumb` instead.\n   */\n  component?: ReactNode;\n}\n\ninterface FooterOptions extends FooterProps {\n  enabled?: boolean;\n  /**\n   * @deprecated use `slots.footer` instead.\n   */\n  component?: ReactNode;\n}\n\ntype TableOfContentOptions = Pick<TOCProviderProps, 'single'> &\n  TOCProps & {\n    enabled?: boolean;\n    /**\n     * @deprecated use `slots.toc` instead.\n     */\n    component?: ReactNode;\n  };\n\ntype TableOfContentPopoverOptions = TOCPopoverProps & {\n  enabled?: boolean;\n  /**\n   * @deprecated use `slots.tocPopover` instead.\n   */\n  component?: ReactNode;\n};\n\ninterface DocsPageSlots {\n  toc: {\n    provider: FC<TOCProviderProps>;\n    main: FC<TOCProps>;\n    popover: FC<TOCPopoverProps>;\n  };\n  container: FC<ComponentProps<'article'>>;\n  footer: FC<FooterProps>;\n  breadcrumb: FC<BreadcrumbProps>;\n}\n\nconst PageContext = createContext<{\n  full: NonNullable<DocsPageProps['full']>;\n  slots: DocsPageSlots;\n} | null>(null);\n\nexport function useDocsPage() {\n  const context = use(PageContext);\n  if (!context)\n    throw new Error(\n      'Please use page components under <DocsPage /> (`fumadocs-ui/layouts/notebook/page`).',\n    );\n  return context;\n}\n\nexport function DocsPage({\n  full = false,\n  tableOfContent: { enabled: tocEnabled = !full, single, ...tocProps } = {},\n  tableOfContentPopover: { enabled: tocPopoverEnabled, ...tocPopoverProps } = {},\n  breadcrumb: { enabled: breadcrumbEnabled = true, ...breadcrumb } = {},\n  footer: { enabled: footerEnabled = true, ...footer } = {},\n  toc = [],\n  slots: defaultSlots = {},\n  children,\n  ...containerProps\n}: DocsPageProps) {\n  tocPopoverEnabled ??= Boolean(toc.length > 0 || tocPopoverProps.header || tocPopoverProps.footer);\n\n  const slots: DocsPageSlots = {\n    breadcrumb: defaultSlots.breadcrumb ?? Breadcrumb,\n    footer: defaultSlots.footer ?? Footer,\n    toc: defaultSlots.toc ?? {\n      provider: TOCProvider,\n      main: TOC,\n      popover: TOCPopover,\n    },\n    container: defaultSlots.container ?? Container,\n  };\n\n  return (\n    <PageContext\n      value={{\n        full,\n        slots,\n      }}\n    >\n      <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>\n        {tocPopoverEnabled &&\n          (tocPopoverProps.component ?? <slots.toc.popover {...tocPopoverProps} />)}\n        <slots.container {...containerProps}>\n          {breadcrumbEnabled && (breadcrumb.component ?? <slots.breadcrumb {...breadcrumb} />)}\n          {children}\n          {footerEnabled && (footer.component ?? <slots.footer {...footer} />)}\n        </slots.container>\n        {tocEnabled && (tocProps.component ?? <slots.toc.main {...tocProps} />)}\n      </slots.toc.provider>\n    </PageContext>\n  );\n}\n\nexport function EditOnGitHub(props: ComponentProps<'a'>) {\n  const t = useTranslations({ note: 'edit page' });\n\n  return (\n    <a\n      target=\"_blank\"\n      rel=\"noreferrer noopener\"\n      {...props}\n      className={cn(\n        buttonVariants({\n          color: 'secondary',\n          size: 'sm',\n        }),\n        'gap-1.5 not-prose',\n        props.className,\n      )}\n    >\n      {props.children ?? (\n        <>\n          <Edit className=\"size-3.5\" />\n          {t('Edit on GitHub')}\n        </>\n      )}\n    </a>\n  );\n}\n\n/**\n * Add typography styles\n */\nexport function DocsBody({ children, className, ...props }: ComponentProps<'div'>) {\n  return (\n    <div {...props} className={cn('prose flex-1', className)}>\n      {children}\n    </div>\n  );\n}\n\nexport function DocsDescription({ children, className, ...props }: ComponentProps<'p'>) {\n  // Don't render if no description provided\n  if (children === undefined) return null;\n\n  return (\n    <p {...props} className={cn('mb-8 text-lg text-fd-muted-foreground', className)}>\n      {children}\n    </p>\n  );\n}\n\nexport function DocsTitle({ children, className, ...props }: ComponentProps<'h1'>) {\n  return (\n    <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>\n      {children}\n    </h1>\n  );\n}\n\nexport function PageLastUpdate({\n  date: value,\n  ...props\n}: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {\n  const t = useTranslations({ note: 'page footer' });\n  const [date, setDate] = useState('');\n\n  useEffect(() => {\n    // to the timezone of client\n    setDate(value.toLocaleDateString());\n  }, [value]);\n\n  return (\n    <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>\n      {t('Last updated on')} {date}\n    </p>\n  );\n}\n\nexport { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from 'local:<dir>/notebook/page/slots/breadcrumb.tsx';\nexport { type FooterProps, Footer as PageFooter } from 'local:<dir>/notebook/page/slots/footer.tsx';\nexport { MarkdownCopyButton, ViewOptionsPopover } from 'local:<dir>/ai/page-actions.tsx';\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/sidebar"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "layouts/shared"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "layouts/notebook"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/container"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/header"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/page/toc"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/page/footer"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/page/breadcrumb"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "slots/notebook/page/container"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "button"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "ai/page-actions"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "@fuma-translate/react": "^1.0.2",
+    "lucide-react": "^1.34.0"
+  },
+  "devDependencies": {}
+}

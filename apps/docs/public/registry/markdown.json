@@ -1,0 +1,24 @@
+{
+  "name": "markdown",
+  "files": [
+    {
+      "type": "components",
+      "path": "components/markdown.tsx",
+      "content": "import { remark } from 'remark';\nimport remarkGfm from 'remark-gfm';\nimport remarkRehype from 'remark-rehype';\nimport { toJsxRuntime } from 'hast-util-to-jsx-runtime';\nimport {\n  Children,\n  type ComponentProps,\n  type ReactElement,\n  type ReactNode,\n  Suspense,\n  use,\n  useDeferredValue,\n} from 'react';\nimport { Fragment, jsx, jsxs } from 'react/jsx-runtime';\nimport { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';\nimport defaultMdxComponents from 'fumadocs-ui/mdx';\nimport { visit } from 'unist-util-visit';\nimport type { ElementContent, Root, RootContent } from 'hast';\n\nexport interface Processor {\n  process: (content: string) => Promise<ReactNode>;\n}\n\nexport function rehypeWrapWords() {\n  return (tree: Root) => {\n    visit(tree, ['text', 'element'], (node, index, parent) => {\n      if (node.type === 'element' && node.tagName === 'pre') return 'skip';\n      if (node.type !== 'text' || !parent || index === undefined) return;\n\n      const words = node.value.split(/(?=\\s)/);\n\n      // Create new span nodes for each word and whitespace\n      const newNodes: ElementContent[] = words.flatMap((word) => {\n        if (word.length === 0) return [];\n\n        return {\n          type: 'element',\n          tagName: 'span',\n          properties: {\n            class: 'animate-fd-fade-in',\n          },\n          children: [{ type: 'text', value: word }],\n        };\n      });\n\n      Object.assign(node, {\n        type: 'element',\n        tagName: 'span',\n        properties: {},\n        children: newNodes,\n      } satisfies RootContent);\n      return 'skip';\n    });\n  };\n}\n\nfunction createProcessor(): Processor {\n  const processor = remark().use(remarkGfm).use(remarkRehype).use(rehypeWrapWords);\n\n  return {\n    async process(content) {\n      const nodes = processor.parse({ value: content });\n      const hast = await processor.run(nodes);\n\n      return toJsxRuntime(hast, {\n        development: false,\n        jsx,\n        jsxs,\n        Fragment,\n        components: {\n          ...defaultMdxComponents,\n          pre: Pre,\n          img: undefined, // use JSX\n        },\n      });\n    },\n  };\n}\n\nfunction Pre(props: ComponentProps<'pre'>) {\n  const code = Children.only(props.children) as ReactElement;\n  const codeProps = code.props as ComponentProps<'code'>;\n  const content = codeProps.children;\n  if (typeof content !== 'string') return null;\n\n  let lang =\n    codeProps.className\n      ?.split(' ')\n      .find((v) => v.startsWith('language-'))\n      ?.slice('language-'.length) ?? 'text';\n\n  if (lang === 'mdx') lang = 'md';\n\n  return <DynamicCodeBlock lang={lang} code={content.trimEnd()} />;\n}\n\nconst processor = createProcessor();\n\nexport function Markdown({ text }: { text: string }) {\n  const deferredText = useDeferredValue(text);\n\n  return (\n    <Suspense fallback={<p className=\"invisible\">{text}</p>}>\n      <Renderer text={deferredText} />\n    </Suspense>\n  );\n}\n\nconst cache = new Map<string, Promise<ReactNode>>();\n\nfunction Renderer({ text }: { text: string }) {\n  const result = cache.get(text) ?? processor.process(text);\n  cache.set(text, result);\n\n  return use(result);\n}\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-rehype": "^11.1.2",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "react": "^19.2.8",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.5"
+  }
+}

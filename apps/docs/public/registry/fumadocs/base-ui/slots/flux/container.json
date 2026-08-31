@@ -1,0 +1,25 @@
+{
+  "name": "slots/flux/container",
+  "files": [
+    {
+      "path": "layouts/flux/slots/container.tsx",
+      "type": "layout",
+      "target": "<dir>/flux/slots/container.tsx",
+      "content": "'use client';\n\nimport { cn } from 'local:utils/cn.ts';\nimport type { ComponentProps } from 'react';\n\nexport function Container(props: ComponentProps<'div'>) {\n  return (\n    <div\n      id=\"nd-flux-layout\"\n      {...props}\n      className={cn('flex flex-col items-center pb-24 overflow-x-clip', props.className)}\n    />\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null
+  },
+  "devDependencies": {}
+}

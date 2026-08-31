@@ -1,0 +1,23 @@
+{
+  "indexes": [
+    {
+      "name": "base"
+    },
+    {
+      "name": "accordion"
+    },
+    {
+      "name": "files"
+    },
+    {
+      "name": "steps"
+    },
+    {
+      "name": "tabs"
+    },
+    {
+      "name": "all"
+    }
+  ],
+  "unlistedIndexes": []
+}

@@ -1,0 +1,33 @@
+{
+  "name": "slots/shared/search-trigger",
+  "files": [
+    {
+      "path": "layouts/shared/slots/search-trigger.tsx",
+      "type": "layout",
+      "target": "<dir>/shared/slots/search-trigger.tsx",
+      "content": "'use client';\nimport type { ComponentProps } from 'react';\nimport { Search } from 'lucide-react';\nimport { useSearchContext } from '@fumadocs/base-ui/contexts/search';\nimport { useTranslations } from '@fuma-translate/react';\nimport { cn } from 'local:utils/cn.ts';\nimport { type ButtonProps, buttonVariants } from 'local:components/ui/button.tsx';\nimport { Dialog } from '@base-ui/react/dialog';\n\nexport interface SearchTriggerProps extends Omit<ComponentProps<'button'>, 'color'>, ButtonProps {\n  hideIfDisabled?: boolean;\n}\n\nexport function SearchTrigger({\n  hideIfDisabled,\n  size = 'icon-sm',\n  color = 'ghost',\n  ...props\n}: SearchTriggerProps) {\n  const { enabled, dialogHandle } = useSearchContext();\n  const t = useTranslations({ note: 'search trigger' });\n  if (hideIfDisabled && !enabled) return null;\n\n  return (\n    <Dialog.Trigger\n      handle={dialogHandle}\n      type=\"button\"\n      className={cn(\n        buttonVariants({\n          size,\n          color,\n        }),\n        props.className,\n      )}\n      data-search=\"\"\n      aria-label={t('Open Search', { note: 'aria-label' })}\n    >\n      <Search />\n    </Dialog.Trigger>\n  );\n}\n\nexport interface FullSearchTriggerProps extends ComponentProps<'button'> {\n  hideIfDisabled?: boolean;\n}\n\nexport function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTriggerProps) {\n  const { enabled, hotKey, dialogHandle } = useSearchContext();\n  const t = useTranslations({ note: 'search trigger' });\n  if (hideIfDisabled && !enabled) return null;\n\n  return (\n    <Dialog.Trigger\n      handle={dialogHandle}\n      type=\"button\"\n      data-search-full=\"\"\n      {...props}\n      className={cn(\n        'inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',\n        props.className,\n      )}\n    >\n      <Search className=\"size-4\" />\n      {t('Search')}\n      <div className=\"ms-auto inline-flex gap-0.5\">\n        {hotKey.map((k, i) => (\n          <kbd key={i} className=\"rounded-md border bg-fd-background px-1.5\">\n            {k.display}\n          </kbd>\n        ))}\n      </div>\n    </Dialog.Trigger>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "button"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "@fuma-translate/react": "^1.0.2",
+    "@base-ui/react": "^1.7.0"
+  },
+  "devDependencies": {}
+}

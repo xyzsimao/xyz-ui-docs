@@ -1,13 +1,10 @@
 {
-  "extends": "typescript-config/react-library.json",
+  "extends": "tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": [
-      "remark-directive",
-      "node"
-    ]
+    "types": ["@types/mdx"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

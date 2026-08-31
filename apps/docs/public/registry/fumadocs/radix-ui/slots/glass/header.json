@@ -1,0 +1,46 @@
+{
+  "name": "slots/glass/header",
+  "files": [
+    {
+      "path": "layouts/glass/slots/header.tsx",
+      "type": "layout",
+      "target": "<dir>/glass/slots/header.tsx",
+      "content": "'use client';\nimport { type ComponentProps } from 'react';\nimport { ChevronsUpDown, LanguagesIcon, MessageCircleIcon, SidebarIcon } from 'lucide-react';\nimport { cn } from 'local:utils/cn.ts';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { useTranslations } from '@fuma-translate/react';\nimport { SidebarTrigger } from 'local:<dir>/docs-sidebar/base.tsx';\nimport { useGlassLayout } from 'local:<dir>/glass/index.tsx';\nimport { LayoutTabsDropdown } from 'local:<dir>/glass/layout-tabs.tsx';\n\nexport type HeaderProps = ComponentProps<'div'>;\n\nconst baseVariants =\n  'rounded-full bg-fd-popover/80 text-fd-popover-foreground border backdrop-blur-sm shadow-sm';\n\nexport function Header({ className, ...props }: HeaderProps) {\n  const {\n    props: { tabs, aiChat },\n    slots,\n  } = useGlassLayout();\n  const t = useTranslations();\n  const sidebar = slots.sidebar.use();\n\n  return (\n    <div\n      className={cn(\n        'sticky flex flex-row justify-end gap-2 [grid-area:left-margin/left-margin/right/right] z-20 px-4 md:top-0 md:pt-2 md:px-2 md:h-12 md:bg-linear-to-b md:from-fd-background max-md:bottom-0 max-md:mt-auto max-md:h-16 max-md:pb-4 max-md:bg-linear-to-t max-md:from-fd-background',\n        className,\n      )}\n      {...props}\n    >\n      {sidebar.collapsible && sidebar.collapsed && (\n        <button\n          aria-label={t('Show Sidebar', { note: 'sidebar' })}\n          className={cn(\n            buttonVariants({ size: 'icon-sm', variant: 'secondary' }),\n            baseVariants,\n            'size-10 me-auto shrink-0 max-md:hidden',\n          )}\n          onClick={() => sidebar.setCollapsed(false)}\n        >\n          <SidebarIcon />\n        </button>\n      )}\n      {slots.searchTrigger && (\n        <slots.searchTrigger.sm\n          color=\"secondary\"\n          size=\"icon\"\n          className={cn(baseVariants, 'size-12 shrink-0 md:hidden')}\n        />\n      )}\n      {tabs.length > 0 && (\n        <LayoutTabsDropdown\n          tabs={tabs}\n          size=\"lg\"\n          className={cn(baseVariants, 'min-w-0 ps-4 pe-3 flex-1 [&_svg]:size-5 md:hidden')}\n        />\n      )}\n      {slots.searchTrigger && (\n        <div className=\"@container flex justify-end flex-1 max-md:hidden\">\n          <slots.searchTrigger.full\n            className={cn(baseVariants, 'text-fd-muted-foreground ps-3 w-full @sm:max-w-[200px]')}\n          />\n        </div>\n      )}\n      {aiChat && !aiChat.open && (\n        <button\n          className={cn(\n            buttonVariants({ variant: 'secondary' }),\n            baseVariants,\n            'px-3 gap-2 text-fd-muted-foreground shrink-0 max-md:hidden',\n          )}\n          onClick={() => aiChat.onOpenChange(true)}\n        >\n          <MessageCircleIcon className=\"size-4\" />\n          {t('Ask AI', { note: 'AI chat button' })}\n        </button>\n      )}\n      {slots.languageSelect && (\n        <slots.languageSelect.root className={cn(baseVariants, 'px-3 rounded-full max-md:hidden')}>\n          <LanguagesIcon className=\"size-4 text-fd-muted-foreground shrink-0\" />\n          <slots.languageSelect.text />\n          <ChevronsUpDown className=\"size-3.5 text-fd-muted-foreground shrink-0\" />\n        </slots.languageSelect.root>\n      )}\n      {slots.themeSwitch && (\n        <slots.themeSwitch className={cn(baseVariants, 'shrink-0 px-1.5 max-md:hidden')} />\n      )}\n      <SidebarTrigger\n        className={cn(\n          buttonVariants({ variant: 'secondary', size: 'icon' }),\n          baseVariants,\n          'shrink-0 size-12 md:hidden',\n        )}\n      >\n        <SidebarIcon />\n      </SidebarTrigger>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "button"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/sidebar"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/glass"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/glass/layout-tabs"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "@fuma-translate/react": "^1.0.2"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,26 @@
+{
+  "name": "steps",
+  "files": [
+    {
+      "type": "lib",
+      "path": "steps.ts",
+      "target": "<dir>/sanity/steps.ts",
+      "content": "import { defineType, defineField } from 'sanity';\n\nexport const step = defineType({\n  name: 'step',\n  type: 'object',\n  title: 'Step',\n  fields: [\n    defineField({\n      name: 'body',\n      title: 'Body',\n      type: 'blockContent',\n    }),\n  ],\n});\n\nexport const steps = defineType({\n  name: 'steps',\n  type: 'object',\n  title: 'Steps',\n  fields: [\n    defineField({\n      name: 'items',\n      title: 'Steps',\n      type: 'array',\n      of: [{ type: 'step' }],\n    }),\n  ],\n  preview: {\n    select: {\n      items: 'items',\n    },\n    prepare({ items = [] }) {\n      return {\n        title: `${items.length} Steps`,\n      };\n    },\n  },\n});\n"
+    },
+    {
+      "type": "components",
+      "path": "steps.component.tsx",
+      "target": "<dir>/sanity/steps.tsx",
+      "content": "import type {\n  NodeRenderer,\n  PortableTextBlock,\n  PortableTextTypeComponent,\n} from '@portabletext/react';\nimport { Step, Steps } from 'fumadocs-ui/components/steps';\n\nexport interface StepValue {\n  _key?: string;\n  _type: 'step';\n  body?: PortableTextBlock[];\n}\n\nexport interface StepsValue {\n  _type: 'steps';\n  items?: StepValue[];\n}\n\nfunction renderBlocks(blocks: PortableTextBlock[] | undefined, renderNode: NodeRenderer) {\n  return (\n    blocks?.map((node, index) => renderNode({ node, index, isInline: false, renderNode })) ?? null\n  );\n}\n\nexport const stepsComponents: {\n  step: PortableTextTypeComponent<StepValue>;\n  steps: PortableTextTypeComponent<StepsValue>;\n} = {\n  step({ value, renderNode }) {\n    return <Step>{renderBlocks(value.body, renderNode)}</Step>;\n  },\n  steps({ value, renderNode }) {\n    return (\n      <Steps>\n        {value.items?.map((item, index) => (\n          <Step key={item._key ?? index}>{renderBlocks(item.body, renderNode)}</Step>\n        ))}\n      </Steps>\n    );\n  },\n};\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "sanity": null,
+    "@portabletext/react": "^8.0.1"
+  },
+  "devDependencies": {}
+}

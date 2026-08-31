@@ -1,0 +1,90 @@
+{
+  "name": "layouts/flux",
+  "files": [
+    {
+      "type": "layout",
+      "path": "layouts/flux/index.tsx",
+      "target": "<dir>/flux/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/flux"
+      },
+      "content": "'use client';\nimport type * as PageTree from 'fumadocs-core/page-tree';\nimport {\n  type BaseLayoutProps,\n  baseSlots,\n  type BaseSlots,\n  type BaseSlotsProps,\n  getLayoutTabs,\n  type GetLayoutTabsOptions,\n  type LayoutTab,\n  useLinkItems,\n} from 'local:<dir>/shared/index.tsx';\nimport { TreeContextProvider } from 'fumadocs-ui/contexts/tree';\nimport { type ComponentProps, createContext, type FC, type ReactNode, use, useMemo } from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { TabDropdown, type TabDropdownProps } from 'local:<dir>/flux/slots/tab-dropdown.tsx';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { Languages } from 'lucide-react';\nimport { LinkItem, type LinkItemType } from 'local:<dir>/shared/index.tsx';\nimport { motion } from 'motion/react';\nimport { RemoveScroll } from 'react-remove-scroll';\nimport { useSearchContext } from 'fumadocs-ui/contexts/search';\nimport {\n  SidebarProvider,\n  Sidebar,\n  SidebarTrigger,\n  useSidebar,\n  type SidebarProviderProps,\n  type SidebarProps,\n} from 'local:<dir>/flux/slots/sidebar.tsx';\nimport { Container } from 'local:<dir>/flux/slots/container.tsx';\n\nexport interface DocsSlots extends BaseSlots {\n  container: FC<ComponentProps<'div'>>;\n  tabDropdown: FC<TabDropdownProps>;\n  sidebar: {\n    provider: FC<SidebarProviderProps>;\n    trigger: FC<ComponentProps<'button'>>;\n    root: FC<SidebarProps>;\n    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (v: boolean) => void };\n  };\n}\n\nexport interface DocsLayoutProps extends BaseLayoutProps {\n  tree: PageTree.Root;\n  sidebar?: SidebarOptions;\n  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;\n  slots?: Partial<DocsSlots>;\n  renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;\n\n  containerProps?: ComponentProps<'div'>;\n}\n\ninterface SidebarOptions extends SidebarProps, SidebarProviderProps {\n  enabled?: boolean;\n  /**\n   * @deprecated use layout-level `tabs` instead.\n   */\n  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;\n}\n\nconst LayoutContext = createContext<{\n  props: BaseSlotsProps;\n  menuItems: LinkItemType[];\n  navItems: LinkItemType[];\n  slots: DocsSlots;\n} | null>(null);\n\nexport function useFluxLayout() {\n  const context = use(LayoutContext);\n  if (!context)\n    throw new Error(\n      'Please use Flux layout components under <DocsLayout /> (`fumadocs-ui/layouts/flux`).',\n    );\n  return context;\n}\n\nconst { useBaseSlots } = baseSlots({\n  useProps() {\n    return useFluxLayout().props;\n  },\n});\n\nexport function DocsLayout(props: DocsLayoutProps) {\n  const {\n    tree,\n    nav = {},\n    sidebar: {\n      enabled: sidebarEnabled = true,\n      tabs: _tabs,\n      defaultOpenLevel,\n      prefetch,\n      ...sidebarProps\n    } = {},\n    tabs: defaultTabs = _tabs,\n    children,\n    containerProps,\n    renderNavigationPanel = (props) => <NavigationPanel {...props} />,\n    slots: defaultSlots = {},\n  } = props;\n  const linkItems = useLinkItems(props);\n  const { baseSlots, baseProps } = useBaseSlots(props);\n\n  const tabs = useMemo(() => {\n    if (Array.isArray(defaultTabs)) {\n      return defaultTabs;\n    }\n    if (typeof defaultTabs === 'object') {\n      return getLayoutTabs(tree, defaultTabs);\n    }\n    if (defaultTabs !== false) {\n      return getLayoutTabs(tree);\n    }\n    return [];\n  }, [tree, defaultTabs]);\n  const slots: DocsSlots = {\n    ...baseSlots,\n    container: defaultSlots.container ?? Container,\n    tabDropdown: defaultSlots.tabDropdown ?? TabDropdown,\n    sidebar: defaultSlots.sidebar ?? {\n      root: Sidebar,\n      provider: SidebarProvider,\n      trigger: SidebarTrigger,\n      useSidebar,\n    },\n  };\n\n  return (\n    <LayoutContext\n      value={{\n        props: baseProps,\n        slots,\n        ...linkItems,\n      }}\n    >\n      <TreeContextProvider tree={tree}>\n        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>\n          <slots.container {...containerProps}>\n            {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}\n            {children}\n          </slots.container>\n        </slots.sidebar.provider>\n        {renderNavigationPanel({\n          head: (\n            <>\n              {slots.navTitle && (\n                <slots.navTitle className=\"inline-flex items-center gap-2.5 text-sm font-semibold\" />\n              )}\n              {nav.children}\n            </>\n          ),\n          tabDropdown: slots.tabDropdown && tabs.length > 0 && (\n            <slots.tabDropdown className=\"flex-1\" tabs={tabs} />\n          ),\n          tool: (\n            <>\n              {slots.languageSelect && (\n                <slots.languageSelect.root>\n                  <Languages className=\"size-4.5\" />\n                </slots.languageSelect.root>\n              )}\n              {slots.searchTrigger && (\n                <slots.searchTrigger.sm hideIfDisabled className=\"rounded-lg\" />\n              )}\n              {slots.sidebar && (\n                <slots.sidebar.trigger\n                  className={cn(\n                    buttonVariants({\n                      variant: 'ghost',\n                      size: 'icon-sm',\n                      className: 'overflow-hidden',\n                    }),\n                  )}\n                />\n              )}\n              {slots.themeSwitch && (\n                <slots.themeSwitch className=\"p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg\" />\n              )}\n            </>\n          ),\n          link: linkItems.menuItems\n            .filter((item) => item.type === 'icon')\n            .map((item, i) => (\n              <LinkItem\n                key={i}\n                item={item}\n                className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}\n                aria-label={item.label}\n              >\n                {item.icon}\n              </LinkItem>\n            )),\n        })}\n      </TreeContextProvider>\n    </LayoutContext>\n  );\n}\n\nexport interface NavigationPanelProps {\n  head: ReactNode;\n  tabDropdown: ReactNode;\n  tool: ReactNode;\n  link: ReactNode;\n}\n\nexport function NavigationPanel({\n  head,\n  tabDropdown,\n  tool,\n  link,\n  children = (v) => v,\n  ...props\n}: NavigationPanelProps &\n  Omit<ComponentProps<typeof motion.div>, 'children'> & {\n    /**\n     * replace default children\n     */\n    children?: (defaultChildren: ReactNode) => ReactNode;\n  }) {\n  const { open } = useSearchContext();\n  return (\n    <motion.div\n      {...props}\n      className={cn(\n        'fixed left-1/2 w-[calc(100%-var(--removed-body-scroll-bar-size,0px))] translate-x-[calc(-50%-var(--removed-body-scroll-bar-size,0px)/2)] bottom-0 z-40 bg-fd-popover text-fd-popover-foreground border-t shadow-lg sm:bottom-6 sm:rounded-2xl sm:border sm:max-w-[380px]',\n        props.className,\n      )}\n      animate={\n        props.animate ?? {\n          scale: open ? 0.9 : 1,\n          translateY: open ? 20 : 0,\n          opacity: open ? 0.8 : 1,\n        }\n      }\n    >\n      {children(\n        <>\n          <div className=\"flex flex-row items-center ps-2.5 p-1 gap-2 min-h-11\">\n            {head}\n            <div id=\"flux-layout-slot\" className=\"flex-1\" />\n          </div>\n\n          <div className=\"flex flex-row gap-1.5 overflow-x-auto overflow-y-hidden p-2 sm:p-1\">\n            <div className=\"flex flex-row items-center gap-2 min-w-0 flex-1\">{tabDropdown}</div>\n\n            <div className=\"flex flex-row items-center text-fd-muted-foreground border-x px-0.5 empty:hidden\">\n              {link}\n            </div>\n\n            <div className=\"flex flex-row items-center text-fd-muted-foreground empty:hidden\">\n              {tool}\n            </div>\n          </div>\n        </>,\n      )}\n    </motion.div>\n  );\n}\n\nexport function NavigationPanelOverlay({\n  enabled = false,\n  className,\n  ...props\n}: ComponentProps<typeof motion.div> & { enabled?: boolean }) {\n  return (\n    <RemoveScroll enabled={enabled}>\n      <motion.div\n        className={cn(\n          'fixed inset-0 z-30 pr-(--removed-body-scroll-bar-size,0) backdrop-blur-md bg-fd-background/60',\n          !enabled && 'pointer-events-none',\n          className,\n        )}\n        initial=\"hide\"\n        variants={{\n          show: {\n            opacity: 1,\n          },\n          hide: {\n            opacity: 0,\n          },\n        }}\n        animate={enabled ? 'show' : 'hide'}\n        exit=\"hide\"\n        {...props}\n      />\n    </RemoveScroll>\n  );\n}\n"
+    },
+    {
+      "type": "layout",
+      "path": "layouts/flux/page/index.tsx",
+      "target": "<dir>/flux/page/index.tsx",
+      "meta": {
+        "preserveAs": "layouts/flux/page"
+      },
+      "content": "'use client';\nimport {\n  type ComponentProps,\n  createContext,\n  type FC,\n  type ReactNode,\n  use,\n  useEffect,\n  useState,\n} from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { useTranslations } from '@fuma-translate/react';\nimport { TOC, TOCProvider, type TOCProviderProps, type TOCProps } from 'local:<dir>/flux/page/slots/toc.tsx';\nimport { Footer, type FooterProps } from 'local:<dir>/flux/page/slots/footer.tsx';\nimport { Breadcrumb, type BreadcrumbProps } from 'local:<dir>/flux/page/slots/breadcrumb.tsx';\nimport { Container } from 'local:<dir>/flux/page/slots/container.tsx';\nimport type { TOCItemType } from 'fumadocs-core/toc';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { Edit } from 'lucide-react';\n\nexport interface DocsPageProps extends ComponentProps<'article'> {\n  toc?: TOCItemType[];\n\n  /**\n   * Extend the page to fill all available space\n   *\n   * @defaultValue false\n   */\n  full?: boolean | undefined;\n  slots?: Partial<DocsPageSlots>;\n\n  footer?: FooterOptions;\n  breadcrumb?: BreadcrumbOptions;\n  tableOfContent?: TableOfContentOptions;\n}\n\ntype TableOfContentOptions = Pick<TOCProviderProps, 'single'> &\n  TOCProps & {\n    enabled?: boolean;\n    /**\n     * @deprecated use `slots.toc` instead.\n     */\n    component?: ReactNode;\n  };\n\ninterface BreadcrumbOptions extends BreadcrumbProps {\n  enabled?: boolean;\n  /**\n   * @deprecated use `slots.breadcrumb` instead.\n   */\n  component?: ReactNode;\n}\n\ninterface FooterOptions extends FooterProps {\n  enabled?: boolean;\n  /**\n   * @deprecated use `slots.footer` instead.\n   */\n  component?: ReactNode;\n}\n\ninterface DocsPageSlots {\n  toc: {\n    provider: FC<TOCProviderProps>;\n    main: FC<TOCProps>;\n  };\n  container: FC<ComponentProps<'article'>>;\n  footer: FC<FooterProps>;\n  breadcrumb: FC<BreadcrumbProps>;\n}\n\nconst PageContext = createContext<{\n  full: NonNullable<DocsPageProps['full']>;\n  slots: DocsPageSlots;\n} | null>(null);\n\nexport function useDocsPage() {\n  const context = use(PageContext);\n  if (!context)\n    throw new Error(\n      'Please use page components under <DocsPage /> (`fumadocs-ui/layouts/flux/page`).',\n    );\n  return context;\n}\n\nexport function DocsPage({\n  full = false,\n  tableOfContent: { enabled: tocEnabled = !full, single, ...tocProps } = {},\n  breadcrumb: { enabled: breadcrumbEnabled = true, ...breadcrumb } = {},\n  footer: { enabled: footerEnabled = true, ...footer } = {},\n  toc = [],\n  slots: defaultSlots = {},\n  children,\n  ...containerProps\n}: DocsPageProps) {\n  const slots: DocsPageSlots = {\n    breadcrumb: defaultSlots.breadcrumb ?? Breadcrumb,\n    footer: defaultSlots.footer ?? Footer,\n    container: defaultSlots.container ?? Container,\n    toc: defaultSlots.toc ?? {\n      provider: TOCProvider,\n      main: TOC,\n    },\n  };\n\n  return (\n    <PageContext\n      value={{\n        full,\n        slots,\n      }}\n    >\n      <slots.toc.provider single={single} toc={tocEnabled ? toc : []}>\n        {tocEnabled && (tocProps.component ?? <slots.toc.main {...tocProps} />)}\n        <slots.container {...containerProps}>\n          {breadcrumbEnabled && (breadcrumb.component ?? <slots.breadcrumb {...breadcrumb} />)}\n          {children}\n          {footerEnabled && (footer.component ?? <slots.footer {...footer} />)}\n        </slots.container>\n      </slots.toc.provider>\n    </PageContext>\n  );\n}\n\nexport function EditOnGitHub(props: ComponentProps<'a'>) {\n  const t = useTranslations({ note: 'edit page' });\n\n  return (\n    <a\n      target=\"_blank\"\n      rel=\"noreferrer noopener\"\n      {...props}\n      className={cn(\n        buttonVariants({\n          color: 'secondary',\n          size: 'sm',\n        }),\n        'gap-1.5 not-prose',\n        props.className,\n      )}\n    >\n      {props.children ?? (\n        <>\n          <Edit className=\"size-3.5\" />\n          {t('Edit on GitHub')}\n        </>\n      )}\n    </a>\n  );\n}\n\n/**\n * Add typography styles\n */\nexport function DocsBody({ children, className, ...props }: ComponentProps<'div'>) {\n  return (\n    <div {...props} className={cn('prose flex-1', className)}>\n      {children}\n    </div>\n  );\n}\n\nexport function DocsDescription({ children, className, ...props }: ComponentProps<'p'>) {\n  // Don't render if no description provided\n  if (children === undefined) return null;\n\n  return (\n    <p {...props} className={cn('mb-8 text-lg text-fd-muted-foreground', className)}>\n      {children}\n    </p>\n  );\n}\n\nexport function DocsTitle({ children, className, ...props }: ComponentProps<'h1'>) {\n  return (\n    <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>\n      {children}\n    </h1>\n  );\n}\n\nexport function PageLastUpdate({\n  date: value,\n  ...props\n}: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {\n  const t = useTranslations({ note: 'page footer' });\n  const [date, setDate] = useState('');\n\n  useEffect(() => {\n    // to the timezone of client\n    setDate(value.toLocaleDateString());\n  }, [value]);\n\n  return (\n    <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>\n      {t('Last updated on')} {date}\n    </p>\n  );\n}\n\nexport { type FooterProps, Footer as PageFooter } from 'local:<dir>/flux/page/slots/footer.tsx';\nexport { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from 'local:<dir>/flux/page/slots/breadcrumb.tsx';\nexport { MarkdownCopyButton, ViewOptionsPopover } from 'local:<dir>/ai/page-actions.tsx';\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/shared"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/tab-dropdown"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "button"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/sidebar"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/container"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/page/toc"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/page/footer"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/page/breadcrumb"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "slots/flux/page/container"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "ai/page-actions"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "motion": "^13.1.1",
+    "react-remove-scroll": "^2.7.2",
+    "@fuma-translate/react": "^1.0.2"
+  },
+  "devDependencies": {}
+}

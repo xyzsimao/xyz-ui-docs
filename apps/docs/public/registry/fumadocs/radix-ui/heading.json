@@ -1,0 +1,30 @@
+{
+  "name": "heading",
+  "files": [
+    {
+      "type": "components",
+      "path": "components/heading.tsx",
+      "content": "'use client';\nimport { CopyCheckIcon, LinkIcon } from 'lucide-react';\nimport type { ComponentPropsWithoutRef } from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';\nimport { useTranslations } from '@fuma-translate/react';\n\ntype Types = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';\ntype HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {\n  as?: T;\n};\n\nexport function Heading<T extends Types = 'h1'>({ as, ...props }: HeadingProps<T>) {\n  const As = as ?? 'h1';\n  const t = useTranslations({ note: 'heading anchor' });\n  const [isChecked, onCopy] = useCopyButton(() => {\n    if (!props.id) return;\n\n    const url = new URL(window.location.href);\n    url.hash = props.id;\n    return navigator.clipboard.writeText(url.href);\n  });\n\n  if (!props.id) return <As {...props} />;\n\n  return (\n    <As\n      {...props}\n      className={cn('group/heading flex scroll-m-28 flex-row items-center gap-1', props.className)}\n    >\n      <a data-card=\"\" href={`#${props.id}`}>\n        {props.children}\n      </a>\n      <button\n        aria-label={t('Copy Anchor Link', { note: 'aria-label' })}\n        className={cn(\n          buttonVariants({\n            variant: 'ghost',\n            size: 'icon-xs',\n          }),\n          'not-prose shrink-0 text-fd-muted-foreground opacity-0 transition-opacity group-hover/heading:opacity-100',\n        )}\n        onClick={onCopy}\n      >\n        {isChecked ? <CopyCheckIcon /> : <LinkIcon />}\n      </button>\n    </As>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "button"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "@fuma-translate/react": "^1.0.2"
+  },
+  "devDependencies": {}
+}

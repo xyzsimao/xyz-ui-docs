@@ -1,0 +1,29 @@
+{
+  "name": "slots/docs/page/container",
+  "files": [
+    {
+      "path": "layouts/docs/page/slots/container.tsx",
+      "type": "layout",
+      "target": "<dir>/docs/page/slots/container.tsx",
+      "content": "'use client';\n\nimport type { ComponentProps } from 'react';\nimport { useDocsPage } from 'local:<dir>/docs/page/index.tsx';\nimport { cn } from 'local:utils/cn.ts';\n\nexport function Container(props: ComponentProps<'article'>) {\n  const { full } = useDocsPage();\n\n  return (\n    <main className=\"contents\">\n      <article\n        id=\"nd-page\"\n        data-full={full}\n        {...props}\n        className={cn(\n          'flex flex-col w-full max-w-[900px] mx-auto [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14',\n          full && 'max-w-[1168px]',\n          props.className,\n        )}\n      >\n        {props.children}\n      </article>\n    </main>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "layouts/docs"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/radix-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "react": null
+  },
+  "devDependencies": {}
+}

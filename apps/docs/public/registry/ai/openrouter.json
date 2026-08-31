@@ -1,0 +1,25 @@
+{
+  "name": "ai/openrouter",
+  "title": "AI Chat (AI SDK)",
+  "description": "Ask AI dialog for your docs, default using OpenRouter",
+  "files": [
+    {
+      "type": "route-handler",
+      "route": "api/chat",
+      "path": "lib/openrouter/route.ts",
+      "content": "import { createOpenRouter } from '@openrouter/ai-sdk-provider';\nimport {\n  convertToModelMessages,\n  createUIMessageStreamResponse,\n  stepCountIs,\n  streamText,\n  tool,\n  toUIMessageStream,\n} from 'ai';\nimport { z } from 'zod';\nimport { source } from '@/lib/source';\nimport { Document, type DocumentData } from 'flexsearch';\nimport { $routeHandler } from 'fuma-cli/macros/route-handler';\nimport { ChatUIMessage, SearchTool } from 'local:<dir>/ai/search.tsx';\n\ninterface CustomDocument extends DocumentData {\n  url: string;\n  title: string;\n  description: string;\n  content: string;\n}\nconst searchServer = createSearchServer();\n\nasync function createSearchServer() {\n  const search = new Document<CustomDocument>({\n    document: {\n      id: 'url',\n      index: ['title', 'description', 'content'],\n      store: true,\n    },\n  });\n\n  const docs = await chunkedAll(\n    source.getPages().map(async (page) => {\n      if (!('getText' in page.data)) return null;\n\n      return {\n        title: page.data.title,\n        description: page.data.description,\n        url: page.url,\n        content: await page.data.getText('processed'),\n      } as CustomDocument;\n    }),\n  );\n\n  for (const doc of docs) {\n    if (doc) search.add(doc);\n  }\n\n  return search;\n}\n\nasync function chunkedAll<O>(promises: Promise<O>[]): Promise<O[]> {\n  const SIZE = 50;\n  const out: O[] = [];\n  for (let i = 0; i < promises.length; i += SIZE) {\n    out.push(...(await Promise.all(promises.slice(i, i + SIZE))));\n  }\n  return out;\n}\n\nconst openrouter = createOpenRouter({\n  apiKey: process.env.OPENROUTER_API_KEY,\n});\n\n/** System prompt, you can update it to provide more specific information */\nconst systemPrompt = [\n  'You are an AI assistant for a documentation site.',\n  'Use the `search` tool to retrieve relevant docs context before answering when needed.',\n  'The `search` tool returns raw JSON results from documentation. Use those results to ground your answer and cite sources as markdown links using the document `url` field when available.',\n  'If you cannot find the answer in search results, say you do not know and suggest a better search query.',\n].join('\\n');\n\nexport const handler = $routeHandler(\n  {\n    methods: ['POST'],\n    params: [],\n  },\n  async (req) => {\n    const reqJson = await req.json();\n\n    const result = streamText({\n      model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet'),\n      stopWhen: stepCountIs(5),\n      tools: {\n        search: searchTool,\n      },\n      messages: [\n        { role: 'system', content: systemPrompt },\n        ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {\n          convertDataPart(part) {\n            if (part.type === 'data-client')\n              return {\n                type: 'text',\n                text: `[Client Context: ${JSON.stringify(part.data)}]`,\n              };\n          },\n        })),\n      ],\n      toolChoice: 'auto',\n    });\n\n    return createUIMessageStreamResponse({\n      stream: toUIMessageStream({ stream: result.stream }),\n    });\n  },\n);\n\nconst searchTool = tool({\n  description: 'Search the docs content and return raw JSON results.',\n  inputSchema: z.object({\n    query: z.string(),\n    limit: z.number().int().min(1).max(100).default(10),\n  }),\n  async execute({ query, limit }) {\n    const search = await searchServer;\n    return await search.searchAsync(query, { limit, merge: true, enrich: true });\n  },\n}) satisfies SearchTool;\n"
+    }
+  ],
+  "subComponents": [
+    "ai/shared"
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "fumadocs-ui": null,
+    "flexsearch": "^0.8.212",
+    "@openrouter/ai-sdk-provider": "^3.0.0",
+    "ai": "^7.0.79",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,47 @@
+{
+  "name": "accordion",
+  "files": [
+    {
+      "type": "components",
+      "path": "components/accordion.tsx",
+      "content": "'use client';\n\nimport { Check, LinkIcon } from 'lucide-react';\nimport { type ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';\nimport { cn } from 'local:utils/cn.ts';\nimport { useCopyButton } from '@fumadocs/base-ui/utils/use-copy-button';\nimport { buttonVariants } from 'local:components/ui/button.tsx';\nimport { mergeRefs } from 'local:utils/merge-refs.ts';\nimport { useTranslations } from '@fuma-translate/react';\nimport {\n  Accordion as Root,\n  AccordionContent,\n  AccordionHeader,\n  AccordionItem,\n  AccordionTrigger,\n} from 'local:components/ui/accordion.tsx';\n\nexport function Accordions({\n  ref,\n  className,\n  defaultValue,\n  ...props\n}: ComponentProps<typeof Root>) {\n  const rootRef = useRef<HTMLDivElement>(null);\n  const composedRef = mergeRefs(ref, rootRef);\n  const [value, setValue] = useState<unknown[]>(defaultValue ?? []);\n\n  useEffect(() => {\n    const id = window.location.hash.substring(1);\n    const element = rootRef.current;\n    if (!element || id.length === 0) return;\n\n    const selected = document.getElementById(id);\n    if (!selected || !element.contains(selected)) return;\n    const value = selected.getAttribute('data-accordion-value');\n\n    if (value) setValue((prev) => [value, ...prev]);\n  }, []);\n\n  return (\n    <Root\n      ref={composedRef}\n      value={value}\n      onValueChange={setValue}\n      className={(s) =>\n        cn(\n          'divide-y divide-fd-border overflow-hidden rounded-lg border bg-fd-card',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    />\n  );\n}\n\nexport function Accordion({\n  title,\n  id,\n  value = String(title),\n  children,\n  ...props\n}: Omit<ComponentProps<typeof AccordionItem>, 'value' | 'title'> & {\n  title: string | ReactNode;\n  value?: string;\n}) {\n  return (\n    <AccordionItem value={value} {...props}>\n      <AccordionHeader id={id} data-accordion-value={value}>\n        <AccordionTrigger>{title}</AccordionTrigger>\n        {id ? <CopyButton id={id} /> : null}\n      </AccordionHeader>\n      <AccordionContent hiddenUntilFound>\n        <div className=\"px-4 pb-2 text-[0.9375rem] prose-no-margin [&[hidden]:not([hidden='until-found'])]:hidden\">\n          {children}\n        </div>\n      </AccordionContent>\n    </AccordionItem>\n  );\n}\n\nfunction CopyButton({ id }: { id: string }) {\n  const t = useTranslations({ note: 'accordion' });\n  const [checked, onClick] = useCopyButton(() => {\n    const url = new URL(window.location.href);\n    url.hash = id;\n\n    return navigator.clipboard.writeText(url.toString());\n  });\n\n  return (\n    <button\n      type=\"button\"\n      aria-label={t('Copy Link', { note: 'aria-label' })}\n      className={cn(\n        buttonVariants({\n          color: 'ghost',\n          className: 'text-fd-muted-foreground me-2',\n        }),\n      )}\n      onClick={onClick}\n    >\n      {checked ? <Check className=\"size-3.5\" /> : <LinkIcon className=\"size-3.5\" />}\n    </button>\n  );\n}\n"
+    },
+    {
+      "type": "ui",
+      "path": "components/ui/accordion.tsx",
+      "content": "'use client';\n\nimport { Accordion as Primitive } from '@base-ui/react/accordion';\nimport { ChevronRight } from 'lucide-react';\nimport { type ComponentProps } from 'react';\nimport { cn } from 'local:utils/cn.ts';\n\nexport function Accordion({ className, ...props }: ComponentProps<typeof Primitive.Root>) {\n  return (\n    <Primitive.Root\n      className={(s) =>\n        cn(\n          'divide-y divide-fd-border overflow-hidden rounded-lg border bg-fd-card',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    />\n  );\n}\n\nexport function AccordionItem({ children, ...props }: ComponentProps<typeof Primitive.Item>) {\n  return <Primitive.Item {...props}>{children}</Primitive.Item>;\n}\n\nexport function AccordionHeader({\n  className,\n  children,\n  ...props\n}: ComponentProps<typeof Primitive.Header>) {\n  return (\n    <Primitive.Header\n      className={(s) =>\n        cn(\n          'scroll-m-24 not-prose flex flex-row items-center text-fd-card-foreground font-medium has-focus-visible:bg-fd-accent',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    >\n      {children}\n    </Primitive.Header>\n  );\n}\n\nexport function AccordionTrigger({\n  className,\n  children,\n  ...props\n}: ComponentProps<typeof Primitive.Trigger>) {\n  return (\n    <Primitive.Trigger\n      className={(s) =>\n        cn(\n          'group flex flex-1 items-center gap-2 px-3 py-2.5 text-start focus-visible:outline-none',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    >\n      <ChevronRight className=\"size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-panel-open:rotate-90\" />\n      {children}\n    </Primitive.Trigger>\n  );\n}\n\nexport function AccordionContent({\n  className,\n  children,\n  ...props\n}: ComponentProps<typeof Primitive.Panel>) {\n  return (\n    <Primitive.Panel\n      className={(s) =>\n        cn(\n          'h-(--accordion-panel-height) overflow-hidden transition-[height] ease-out data-ending-style:h-0 data-starting-style:h-0',\n          typeof className === 'function' ? className(s) : className,\n        )\n      }\n      {...props}\n    >\n      {children}\n    </Primitive.Panel>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "button"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "merge-refs"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "accordion"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "@fuma-translate/react": "^1.0.2",
+    "@base-ui/react": "^1.7.0"
+  },
+  "devDependencies": {}
+}

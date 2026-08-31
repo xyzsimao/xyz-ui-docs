@@ -1,38 +1,93 @@
-import type { Processor, Transformer } from 'unified'
-import type { BlockContent, Code, DefinitionContent, Root } from 'mdast'
-import { visit } from 'unist-util-visit'
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx'
+import type { Processor, Transformer } from 'unified';
+import type { BlockContent, Code, Root, RootContent } from 'mdast';
+import { visit } from 'unist-util-visit';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import {
+  type CodeBlockTabsOptions,
   generateCodeBlockTabs,
   parseCodeBlockAttributes,
-} from '@/mdx-plugins/codeblock-utils'
+} from '@/mdx-plugins/codeblock-utils';
 
-type TabType = keyof typeof Types
+type TabType = 'CodeBlockTabs' | 'Tabs';
 export interface RemarkCodeTabOptions {
-  Tabs?: TabType
+  Tabs?: TabType;
 
   /**
    * Parse MDX in tab values
    *
    * @defaultValue false
    */
-  parseMdx?: boolean
+  parseMdx?: boolean;
 }
 
 declare module 'mdast' {
   export interface CodeData {
-    tab?: string
+    /**
+     * [Fumadocs: remark-code-tab] the associated tab value
+     */
+    tab?: string;
+    /**
+     * [Fumadocs: remark-code-tab] the associated tab group ID
+     */
+    tabGroup?: string;
+  }
+
+  export interface Data {
+    /**
+     * [Fumadocs: remark-code-tab] internal
+     */
+    _code_tab_visited?: true;
   }
 }
 
-const Tabs = {
-  convert(
-    processor: Processor,
-    nodes: Code[],
-    withMdx = false,
-    withParent = true
-  ): MdxJsxFlowElement {
-    const tabs = Array.from(processTabValue(nodes).entries())
+type TabHandler = (
+  processor: Processor,
+  nodes: Code[],
+  withMdx: boolean,
+  withParent: boolean,
+) => RootContent[];
+
+const Types: Record<TabType, TabHandler> = {
+  CodeBlockTabs(processor, nodes, withMdx, withParent) {
+    const tabs = processTabValue(nodes);
+    let isFirstTab = true;
+    const options: CodeBlockTabsOptions = {
+      triggers: [],
+      tabs: [],
+    };
+
+    for (const [value, list] of tabs) {
+      if (isFirstTab) {
+        const tagGroup = list[0].data?.tabGroup;
+        options.defaultValue = value;
+
+        if (tagGroup) options.persist = { id: tagGroup };
+        isFirstTab = false;
+      }
+
+      options.triggers.push({
+        value,
+        children: withMdx
+          ? (mdxToAst(processor, value).children as BlockContent[])
+          : [
+              {
+                type: 'text',
+                value,
+              },
+            ],
+      });
+      options.tabs.push({
+        value,
+        children: list,
+      });
+    }
+
+    const node = generateCodeBlockTabs(options);
+    if (!withParent) return node.children;
+    return [node];
+  },
+  Tabs(processor, nodes, withMdx, withParent) {
+    const tabs = Array.from(processTabValue(nodes).entries());
 
     if (!withMdx) {
       const children: MdxJsxFlowElement[] = tabs.map(([name, codes]) => {
@@ -47,45 +102,47 @@ const Tabs = {
             },
           ],
           children: codes,
-        }
-      })
+        };
+      });
 
-      if (!withParent) return createFragment(children)
+      if (!withParent) return children;
 
-      return {
-        type: 'mdxJsxFlowElement',
-        name: 'Tabs',
-        attributes: [
-          {
-            type: 'mdxJsxAttribute',
-            name: 'items',
-            value: {
-              type: 'mdxJsxAttributeValueExpression',
-              value: tabs.map(([name]) => name).join(', '),
-              data: {
-                estree: {
-                  type: 'Program',
-                  sourceType: 'module',
-                  comments: [],
-                  body: [
-                    {
-                      type: 'ExpressionStatement',
-                      expression: {
-                        type: 'ArrayExpression',
-                        elements: tabs.map(([name]) => ({
-                          type: 'Literal',
-                          value: name,
-                        })),
+      return [
+        {
+          type: 'mdxJsxFlowElement',
+          name: 'Tabs',
+          attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'items',
+              value: {
+                type: 'mdxJsxAttributeValueExpression',
+                value: tabs.map(([name]) => name).join(', '),
+                data: {
+                  estree: {
+                    type: 'Program',
+                    sourceType: 'module',
+                    comments: [],
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: {
+                          type: 'ArrayExpression',
+                          elements: tabs.map(([name]) => ({
+                            type: 'Literal',
+                            value: name,
+                          })),
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
               },
             },
-          },
-        ],
-        children,
-      }
+          ],
+          children,
+        },
+      ];
     }
 
     const children: MdxJsxFlowElement[] = [
@@ -119,175 +176,130 @@ const Tabs = {
               },
             ],
             children: codes,
-          }) as MdxJsxFlowElement
+          }) as MdxJsxFlowElement,
       ),
-    ]
+    ];
 
-    if (!withParent) return createFragment(children)
+    if (!withParent) return children;
 
-    return {
-      type: 'mdxJsxFlowElement',
-      name: 'Tabs',
-      attributes: [
-        {
-          type: 'mdxJsxAttribute',
-          name: 'defaultValue',
-          value: tabs[0][0],
-        },
-      ],
-      children,
-    }
-  },
-}
-
-const CodeBlockTabs = {
-  convert(
-    processor: Processor,
-    nodes: Code[],
-    withMdx = false,
-    withParent = true
-  ): MdxJsxFlowElement {
-    const tabs = Array.from(processTabValue(nodes).entries())
-
-    const node = generateCodeBlockTabs({
-      defaultValue: tabs[0][0],
-      triggers: tabs.map(([name]) => ({
-        value: name,
-        children: [
-          withMdx
-            ? (mdxToAst(processor, name) as unknown as BlockContent)
-            : {
-                type: 'text',
-                value: name,
-              },
+    return [
+      {
+        type: 'mdxJsxFlowElement',
+        name: 'Tabs',
+        attributes: [
+          {
+            type: 'mdxJsxAttribute',
+            name: 'defaultValue',
+            value: tabs[0][0],
+          },
         ],
-      })),
-      tabs: tabs.map(([name, codes]) => ({
-        value: name,
-        children: codes,
-      })),
-    })
-
-    if (!withParent) return createFragment(node.children)
-    return node
+        children,
+      },
+    ];
   },
-}
-
-const Types = {
-  CodeBlockTabs,
-  Tabs,
-}
+};
 
 export function remarkCodeTab(
   this: Processor,
-  options: RemarkCodeTabOptions = {}
+  options: RemarkCodeTabOptions = {},
 ): Transformer<Root, Root> {
-  const { parseMdx = false, Tabs = 'CodeBlockTabs' } = options
+  const { parseMdx = false, Tabs = 'CodeBlockTabs' } = options;
 
   return (tree) => {
-    const ignored = new WeakSet()
-
     visit(tree, (node) => {
-      if (!('children' in node) || ignored.has(node)) return 'skip'
-      let localTabs: TabType = Tabs
-      let localParseMdx = parseMdx
-      let withParent = true
+      if (!('children' in node) || node.data?._code_tab_visited) return 'skip';
+      let localTabs: TabType = Tabs;
+      let localParseMdx = parseMdx;
+      let withParent = true;
 
-      if (
-        node.type === 'mdxJsxFlowElement' &&
-        node.name &&
-        node.name in Types
-      ) {
-        withParent = false
-        localTabs = node.name as TabType
+      if (node.type === 'mdxJsxFlowElement' && node.name && node.name in Types) {
+        withParent = false;
+        localTabs = node.name as TabType;
 
         // for `Tabs` in simple mode, it doesn't support MDX tab names
         if (node.name === 'Tabs' && localParseMdx) {
           localParseMdx = node.attributes.every(
-            (attribute) =>
-              attribute.type !== 'mdxJsxAttribute' || attribute.name !== 'items'
-          )
+            (attribute) => attribute.type !== 'mdxJsxAttribute' || attribute.name !== 'items',
+          );
         }
       }
 
-      let start = -1
-      let end = 0
+      let start = -1;
+      let end = 0;
       const close = () => {
-        if (start === -1 || start === end) return
-        const replacement = Types[localTabs].convert(
+        if (start === -1 || start === end) return;
+        const replacement = Types[localTabs](
           this,
           node.children.slice(start, end) as Code[],
           localParseMdx,
-          withParent
-        )
+          withParent,
+        );
 
-        ignored.add(replacement)
-        node.children.splice(start, end - start, replacement)
-        end = start
-        start = -1
-      }
+        for (const element of replacement) {
+          element.data ??= {};
+          element.data._code_tab_visited = true;
+        }
+
+        node.children.splice(start, end - start, ...replacement);
+        end = start;
+        start = -1;
+      };
 
       for (; end < node.children.length; end++) {
-        const child = node.children[end]
+        const child = node.children[end];
         if (child.type !== 'code' || !child.meta) {
-          close()
-          continue
+          close();
+          continue;
         }
 
-        const meta = parseCodeBlockAttributes(child.meta, ['tab'])
-        if (!meta.attributes.tab) {
-          close()
-          continue
+        const meta = parseCodeBlockAttributes(child.meta, ['tab', 'tab-group']);
+        if (typeof meta.attributes.tab !== 'string') {
+          close();
+          continue;
         }
 
-        if (start === -1) start = end
-        child.meta = meta.rest
-        child.data ??= {}
-        child.data.tab = meta.attributes.tab
+        if (start === -1) start = end;
+        child.meta = meta.rest;
+        child.data ??= {};
+        child.data.tab = meta.attributes.tab;
+        if (typeof meta.attributes['tab-group'] === 'string') {
+          child.data.tabGroup = meta.attributes['tab-group'];
+        }
       }
 
-      close()
-    })
-  }
+      close();
+    });
+  };
 }
 
 function processTabValue(nodes: Code[]) {
-  const out = new Map<string, Code[]>()
+  const out = new Map<string, Code[]>();
 
   for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]
-    const name = node.data?.tab ?? `Tab ${i + 1}`
-    const li = out.get(name) ?? []
-    li.push(node)
-    out.set(name, li)
+    const node = nodes[i];
+    const name = node.data?.tab ?? `Tab ${i + 1}`;
+    let li = out.get(name);
+    if (!li) {
+      li = [];
+      out.set(name, li);
+    }
+
+    li.push(node);
   }
-  return out
+
+  return out;
 }
 
 /**
  * MDX tab name to tab trigger node children
  */
-function mdxToAst(processor: Processor, name: string) {
-  const node = processor.parse(name) as Root
+function mdxToAst(processor: Processor, name: string): Root {
+  const node = processor.parse(name) as Root;
+  node.children = node.children.flatMap((child) => {
+    if (child.type === 'paragraph') return child.children;
 
-  if (node.type === 'root') {
-    node.children = node.children.flatMap((child) => {
-      if (child.type === 'paragraph') return child.children
+    return child;
+  });
 
-      return child
-    })
-  }
-
-  return node
-}
-
-function createFragment(
-  children: (BlockContent | DefinitionContent)[]
-): MdxJsxFlowElement {
-  return {
-    type: 'mdxJsxFlowElement',
-    name: null,
-    attributes: [],
-    children,
-  }
+  return node;
 }

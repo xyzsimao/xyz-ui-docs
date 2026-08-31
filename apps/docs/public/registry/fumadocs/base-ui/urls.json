@@ -1,0 +1,18 @@
+{
+  "name": "urls",
+  "files": [
+    {
+      "type": "lib",
+      "path": "utils/urls.ts",
+      "content": "export function normalize(urlOrPath: string) {\n  if (urlOrPath.length > 1 && urlOrPath.endsWith('/')) return urlOrPath.slice(0, -1);\n  return urlOrPath;\n}\n\n/**\n * @returns if `href` is matching the given pathname\n */\nexport function isActive(href: string, pathname: string, nested = false): boolean {\n  href = normalize(href);\n  pathname = normalize(pathname);\n\n  return href === pathname || (nested && pathname.startsWith(`${href}/`));\n}\n"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null
+  },
+  "devDependencies": {}
+}

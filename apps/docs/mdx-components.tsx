@@ -1,9 +1,9 @@
-import defaultMdxComponents from 'xyzdocs-radix-ui/mdx';
-// import * as FilesComponents from 'xyzdocs-ui/components/files';
-// import * as TabsComponents from 'xyzdocs-ui/components/tabs';
-import type { MDXComponents } from 'mdx/types';
-// import { Accordion, Accordions } from 'xyzdocs-ui/components/accordion';
-import * as icons from 'lucide-react';
+import defaultMdxComponents from 'fumadocs-ui/mdx'
+// import * as FilesComponents from 'fumadocs-ui/components/files';
+// import * as TabsComponents from 'fumadocs-ui/components/tabs';
+import type { MDXComponents } from 'mdx/types'
+// import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import * as icons from 'lucide-react'
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -14,7 +14,7 @@ export function getMDXComponents(components?: MDXComponents) {
     // Accordion,
     // Accordions,
     ...components,
-  } satisfies MDXComponents;
+  } satisfies MDXComponents
 }
 
 // declare module 'mdx/types.js' {

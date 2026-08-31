@@ -1,0 +1,29 @@
+{
+  "name": "slots/shared/theme-switch",
+  "files": [
+    {
+      "path": "layouts/shared/slots/theme-switch.tsx",
+      "type": "layout",
+      "target": "<dir>/shared/slots/theme-switch.tsx",
+      "content": "'use client';\nimport { cva } from 'class-variance-authority';\nimport { Airplay, Moon, Sun } from 'lucide-react';\nimport { useTheme } from 'next-themes';\nimport { type ComponentProps, useEffect, useState } from 'react';\nimport { flushSync } from 'react-dom';\nimport { cn } from 'local:utils/cn.ts';\nimport { useTranslations } from '@fuma-translate/react';\n\nconst itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {\n  variants: {\n    active: {\n      true: 'bg-fd-accent text-fd-accent-foreground',\n      false: 'text-fd-muted-foreground',\n    },\n  },\n});\n\nconst themes = [['light', Sun] as const, ['dark', Moon] as const, ['system', Airplay] as const];\n\nexport interface ThemeSwitchProps extends ComponentProps<'div'> {\n  mode?: 'light-dark' | 'light-dark-system';\n}\n\nexport function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeSwitchProps) {\n  const { setTheme, theme, resolvedTheme } = useTheme();\n  const [mounted, setMounted] = useState(false);\n  const t = useTranslations({ note: 'theme switcher' });\n  const themeAriaLabels = {\n    light: t('Light', { note: 'aria-label' }),\n    dark: t('Dark', { note: 'aria-label' }),\n    system: t('System', { note: 'aria-label' }),\n  };\n\n  const handleThemeChange = (newTheme: string) => {\n    if (document?.startViewTransition) {\n      document.startViewTransition(() => flushSync(() => setTheme(newTheme)));\n    } else {\n      setTheme(newTheme);\n    }\n  };\n\n  useEffect(() => {\n    setMounted(true);\n  }, []);\n\n  const container = cn(\n    'inline-flex items-center rounded-full border p-1 overflow-hidden *:rounded-full',\n    className,\n  );\n\n  if (mode === 'light-dark') {\n    const value = mounted ? resolvedTheme : null;\n\n    return (\n      <button\n        className={container}\n        aria-label={t('Toggle Theme', { note: 'aria-label' })}\n        onClick={() => handleThemeChange(value === 'light' ? 'dark' : 'light')}\n        data-theme-toggle=\"\"\n      >\n        {themes.map(([key, Icon]) => {\n          if (key === 'system') return;\n\n          return (\n            <Icon\n              key={key}\n              fill=\"currentColor\"\n              className={cn(itemVariants({ active: value === key }))}\n            />\n          );\n        })}\n      </button>\n    );\n  }\n\n  const value = mounted ? theme : null;\n\n  return (\n    <div className={container} data-theme-toggle=\"\" {...props}>\n      <button\n        aria-label={themeAriaLabels.light}\n        className={cn(itemVariants({ active: value === 'light' }))}\n        onClick={() => handleThemeChange('light')}\n      >\n        <Sun className=\"size-full\" fill=\"currentColor\" />\n      </button>\n      <button\n        aria-label={themeAriaLabels.dark}\n        className={cn(itemVariants({ active: value === 'dark' }))}\n        onClick={() => handleThemeChange('dark')}\n      >\n        <Moon className=\"size-full\" fill=\"currentColor\" />\n      </button>\n      <button\n        aria-label={themeAriaLabels.system}\n        className={cn(itemVariants({ active: value === 'system' }))}\n        onClick={() => handleThemeChange('system')}\n      >\n        <Airplay className=\"size-full\" fill=\"currentColor\" />\n      </button>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^1.34.0",
+    "next-themes": "^0.4.6",
+    "@fuma-translate/react": "^1.0.2"
+  },
+  "devDependencies": {}
+}

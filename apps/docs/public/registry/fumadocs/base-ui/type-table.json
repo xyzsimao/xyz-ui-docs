@@ -1,0 +1,32 @@
+{
+  "name": "type-table",
+  "files": [
+    {
+      "type": "components",
+      "path": "components/type-table.tsx",
+      "content": "'use client';\n\nimport { ChevronDown } from 'lucide-react';\nimport Link from 'fumadocs-core/link';\nimport { cva } from 'class-variance-authority';\nimport { cn } from 'local:utils/cn.ts';\nimport { type ComponentProps, type ReactNode, useEffect, useState } from 'react';\nimport { Collapsible, CollapsibleContent, CollapsibleTrigger } from 'local:components/ui/collapsible.tsx';\nimport { useTranslations } from '@fuma-translate/react';\n\nexport interface ParameterNode {\n  name: string;\n  description: ReactNode;\n}\n\nexport interface TypeNode {\n  /**\n   * Additional description of the field\n   */\n  description?: ReactNode;\n\n  /**\n   * type signature (short)\n   */\n  type: ReactNode;\n\n  /**\n   * type signature (full)\n   */\n  typeDescription?: ReactNode;\n\n  /**\n   * Optional `href` for the type\n   */\n  typeDescriptionLink?: string;\n\n  default?: ReactNode;\n\n  required?: boolean;\n  deprecated?: boolean;\n\n  /**\n   * a list of parameters info if the type is a function.\n   */\n  parameters?: ParameterNode[];\n\n  returns?: ReactNode;\n}\n\nconst fieldVariants = cva('text-fd-muted-foreground not-prose pe-2');\n\nexport function TypeTable({\n  id,\n  type,\n  className,\n  ...props\n}: { type: Record<string, TypeNode> } & ComponentProps<'div'>) {\n  const t = useTranslations({ note: 'type table' });\n\n  return (\n    <div\n      id={id}\n      className={cn(\n        '@container flex flex-col p-1 bg-fd-card text-fd-card-foreground rounded-2xl border my-6 text-sm overflow-hidden',\n        className,\n      )}\n      {...props}\n    >\n      <div className=\"flex font-medium items-center px-3 py-1 not-prose text-fd-muted-foreground\">\n        <p className=\"w-1/4\">{t('Prop')}</p>\n        <p className=\"@max-xl:hidden\">{t('Type')}</p>\n      </div>\n      {Object.entries(type).map(([key, value]) => (\n        <Item key={key} parentId={id} name={key} item={value} />\n      ))}\n    </div>\n  );\n}\n\nfunction Item({\n  parentId,\n  name,\n  item: {\n    parameters = [],\n    description,\n    required = false,\n    deprecated,\n    typeDescription,\n    default: defaultValue,\n    type,\n    typeDescriptionLink,\n    returns,\n  },\n}: {\n  parentId?: string;\n  name: string;\n  item: TypeNode;\n}) {\n  const t = useTranslations({ note: 'type table' });\n  const [open, setOpen] = useState(false);\n  const id = parentId ? `${parentId}-${name}` : undefined;\n\n  useEffect(() => {\n    const hash = window.location.hash;\n    if (!id || !hash) return;\n    if (`#${id}` === hash) setOpen(true);\n  }, [id]);\n\n  return (\n    <Collapsible\n      id={id}\n      open={open}\n      onOpenChange={(v) => {\n        if (v && id) {\n          window.history.replaceState(null, '', `#${id}`);\n        }\n        setOpen(v);\n      }}\n      className={cn(\n        'rounded-xl border overflow-hidden scroll-m-20 transition-all',\n        open ? 'shadow-sm bg-fd-background not-last:mb-2' : 'border-transparent',\n      )}\n    >\n      <CollapsibleTrigger className=\"relative flex flex-row items-center w-full group text-start px-3 py-2 not-prose hover:bg-fd-accent\">\n        <code\n          className={cn(\n            'text-fd-primary min-w-fit w-1/4 font-mono font-medium pe-2',\n            deprecated && 'line-through text-fd-primary/50',\n          )}\n        >\n          {name}\n          {!required && '?'}\n        </code>\n        {typeDescriptionLink ? (\n          <Link href={typeDescriptionLink} className=\"underline @max-xl:hidden\">\n            {type}\n          </Link>\n        ) : (\n          <span className=\"@max-xl:hidden\">{type}</span>\n        )}\n        <ChevronDown className=\"absolute inset-e-2 size-4 text-fd-muted-foreground transition-transform group-data-[open]:rotate-180\" />\n      </CollapsibleTrigger>\n      <CollapsibleContent>\n        <div className=\"grid grid-cols-[1fr_3fr] gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t\">\n          <div className=\"text-sm prose col-span-full prose-no-margin empty:hidden\">\n            {description}\n          </div>\n          {typeDescription && (\n            <>\n              <p className={cn(fieldVariants())}>{t('Type')}</p>\n              <p className=\"my-auto not-prose\">{typeDescription}</p>\n            </>\n          )}\n          {defaultValue && (\n            <>\n              <p className={cn(fieldVariants())}>{t('Default')}</p>\n              <p className=\"my-auto not-prose\">{defaultValue}</p>\n            </>\n          )}\n          {parameters.length > 0 && (\n            <>\n              <p className={cn(fieldVariants())}>{t('Parameters')}</p>\n              <div className=\"flex flex-col gap-2\">\n                {parameters.map((param) => (\n                  <div key={param.name} className=\"inline-flex items-center flex-wrap gap-1\">\n                    <p className=\"font-medium not-prose text-nowrap\">{param.name} -</p>\n                    <div className=\"text-sm prose prose-no-margin\">{param.description}</div>\n                  </div>\n                ))}\n              </div>\n            </>\n          )}\n          {returns && (\n            <>\n              <p className={cn(fieldVariants())}>{t('Returns')}</p>\n              <div className=\"my-auto text-sm prose prose-no-margin\">{returns}</div>\n            </>\n          )}\n        </div>\n      </CollapsibleContent>\n    </Collapsible>\n  );\n}\n"
+    }
+  ],
+  "subComponents": [
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "cn"
+    },
+    {
+      "type": "sub-registry",
+      "subRegistry": "fumadocs/base-ui",
+      "component": "collapsible"
+    }
+  ],
+  "dependencies": {
+    "fumadocs-core": null,
+    "@fumadocs/base-ui": null,
+    "fumadocs-ui": "npm:@fumadocs/base-ui",
+    "react": null,
+    "lucide-react": "^1.34.0",
+    "class-variance-authority": "^0.7.1",
+    "@fuma-translate/react": "^1.0.2"
+  },
+  "devDependencies": {}
+}
