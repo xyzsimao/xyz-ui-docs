@@ -40,16 +40,16 @@ export const linkItems: LinkItemType[] = [
 export const logo = (
   <>
     <Image
-      alt="Fumadocs"
+      alt="xyzdocs"
       src={Logo}
       sizes="100px"
       className="hidden w-22 in-[.uwu]:block"
-      aria-label="Fumadocs"
+      aria-label="xyzdocs"
     />
 
     <XyzdocsIcon className="size-5 in-[.uwu]:hidden" />
   </>
-);
+)
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -57,9 +57,9 @@ export function baseOptions(): BaseLayoutProps {
       title: (
         <>
           {logo}
-          <span className="font-medium in-[.uwu]:hidden">Fumadocs</span>
+          <span className="font-medium in-[.uwu]:hidden">xyzdocs</span>
         </>
       ),
     },
-  };
+  }
 }

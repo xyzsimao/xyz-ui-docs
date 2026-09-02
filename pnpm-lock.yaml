@@ -671,6 +671,9 @@ importers:
       '@fuma-translate/react':
         specifier: ^1.0.2
         version: 1.0.2(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@fumadocs/tailwind':
+        specifier: workspace:*
+        version: link:../tailwind
       '@radix-ui/react-accordion':
         specifier: ^1.2.20
         version: 1.2.20(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -792,6 +795,27 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
+
+  packages/tailwind:
+    devDependencies:
+      '@fastify/deepmerge':
+        specifier: ^3.2.1
+        version: 3.2.1
+      '@types/node':
+        specifier: ^26.3.0
+        version: 26.3.0
+      postcss-selector-parser:
+        specifier: ^7.1.5
+        version: 7.1.5
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
+      tsdown:
+        specifier: 0.22.14
+        version: 0.22.14(@tsdown/css@0.22.14)(oxc-resolver@11.24.2)(typescript@5.9.2)(unrun@0.3.1)
+      typescript-config:
+        specifier: workspace:*
+        version: link:../typescript-config
 
   packages/typescript-config: {}
 
@@ -1441,6 +1465,9 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fastify/deepmerge@3.2.1':
+    resolution: {integrity: sha512-N5Oqvltoa2r9z1tbx4xjky0oRR60v+T47Ic4J1ukoVQcptLOrIdRnCSdTGmOmajZuHVKlTnfcmrjyqsGEW1ztA==}
 
   '@floating-ui/core@1.8.0':
     resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
@@ -8680,6 +8707,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@fastify/deepmerge@3.2.1': {}
 
   '@floating-ui/core@1.8.0':
     dependencies:

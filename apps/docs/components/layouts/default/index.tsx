@@ -18,20 +18,11 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
       tree={source.getPageTree()}
       // just icon items
       links={linkItems.filter((item) => item.type === 'icon')}
-      nav={{
-        ...base.nav,
-        title: (
-          <>
-            {logo}
-            <span className="font-medium in-[.uwu]:hidden max-md:hidden">Fumadocs</span>
-          </>
-        ),
-      }}
       tabs={{
         transform(option, node) {
-          const meta = source.getNodeMeta(node);
-          if (!meta || !node.icon) return option;
-          const color = `var(--${getSection(meta.path)}-color, var(--color-fd-foreground))`;
+          const meta = source.getNodeMeta(node)
+          if (!meta || !node.icon) return option
+          const color = `var(--${getSection(meta.path)}-color, var(--color-fd-foreground))`
 
           return {
             ...option,
@@ -47,12 +38,12 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
                 {node.icon}
               </div>
             ),
-          };
+          }
         },
       }}
     >
       {children}
-{/* 
+      {/* 
       <AISearch>
         <AISearchPanel />
         <AISearchTrigger
@@ -69,5 +60,5 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
         </AISearchTrigger>
       </AISearch> */}
     </DocsLayout>
-  );
+  )
 }

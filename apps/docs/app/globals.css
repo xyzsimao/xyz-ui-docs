@@ -1,13 +1,9 @@
 
 @import "tailwindcss";
-
 @import 'xyzdocs-radix-ui/style.css';
-
-
-@import './base.css';
-
-
-
+@import 'xyzdocs-radix-ui/css/neutral.css';
+@import 'xyzdocs-radix-ui/css/preset.css';
+@import './base.css'
 
 
 @theme {
@@ -223,7 +219,3 @@
 }
 
 
-
-body {
-  background-color: var(--color-fd-background);
-}

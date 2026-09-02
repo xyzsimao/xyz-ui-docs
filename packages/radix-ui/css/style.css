@@ -1,14 +1,9 @@
 @import 'tailwindcss';
-
-
-@import './vitepress.css';
 @import './neutral.css';
 @import './preset.css';
-@import './shadcn.css';
+@source '../dist/components/**/*.js';
 @layer base {
   body {
     @apply flex flex-col min-h-screen;
   }
 }
-
-@import '@xyzdocs/ui_base/css/base.css'
