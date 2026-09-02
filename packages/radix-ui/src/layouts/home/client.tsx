@@ -1,11 +1,11 @@
 import { ComponentProps, Fragment, useState } from 'react'
 import type { HomeLayoutProps } from '.'
 import Link from 'xyzdocs-core/link'
-import { NavOptions, useLinkItems } from '../shared'
+import { LinkItem, LinkItemType, NavOptions, useLinkItems } from '../shared'
 import { cva } from 'class-variance-authority'
 import { buttonVariants } from '@/components/ui/button'
 import React from 'react'
-import { LinkItem, LinkItemType } from '@xyzdocs/ui_base/link-item'
+ 
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,8 +16,9 @@ import {
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu'
 import cn from 'cnfast'
-import { useIsScrollTop } from '@xyzdocs/ui_base/hooks/use-is-scroll-top'
+ 
 import { ThemeToggle } from '../shared/theme-toggle'
+import { useIsScrollTop } from '@/utils/use-is-scroll-top'
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -176,9 +177,9 @@ export function Header({
   const { navItems, menuItems } = useLinkItems({ links })
   return (
     <HeaderNavigationMenu>
-      {renderTitleNav(nav, {
+      {/* {renderTitleNav(nav, {
         className: 'inline-flex items-center gap-2.5 font-semibold',
-      })}
+      })} */}
       {nav.children}
       <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
         {navItems

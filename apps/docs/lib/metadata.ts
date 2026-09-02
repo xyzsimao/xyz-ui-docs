@@ -43,6 +43,17 @@ export function getPageImage(page: Page) {
   }
 }
 
+
+export function getPageImageUrl(page: Page) {
+  const segments = [...page.slugs, 'image.webp']
+
+  return {
+    segments,
+    url: '/' + [page.locale, 'og', ...segments].filter(Boolean).join('/'),
+  }
+}
+
+
 export const baseUrl =
   process.env.NODE_ENV === 'development' ||
   !process.env.VERCEL_PROJECT_PRODUCTION_URL

@@ -32,7 +32,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
       compiler,
       filePath,
     }) {
-      console.log(' createMdxLoader callback method')
+      //console.log(' createMdxLoader callback method')
 
       let core = await getCore()
       const value = await getSource()
@@ -66,7 +66,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
             JSON.stringify({
               ...out,
               hash: generateCacheHash(value),
-            } satisfies CacheEntry)
+            } satisfies CacheEntry),
           )
         }
       }

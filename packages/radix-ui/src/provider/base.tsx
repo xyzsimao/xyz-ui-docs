@@ -3,10 +3,9 @@
 import { type ComponentPropsWithoutRef, lazy, type ReactNode } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
 // import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
-import { ThemeProvider } from 'next-themes';
-import { I18nProvider, type I18nProviderProps } from '@xyzdocs/ui_base/contexts/i18n';
-import { SearchProvider, type SearchProviderProps } from '@xyzdocs/ui_base/contexts/search';
-
+import { ThemeProvider } from 'next-themes'
+import { I18nProviderProps } from '@/contexts/i18n'
+ 
 // interface SearchOptions extends Omit<SearchProviderProps, 'options' | 'children'> {
 //   options?: Partial<DefaultSearchDialogProps>;
 

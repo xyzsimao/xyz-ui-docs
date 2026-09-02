@@ -1,100 +1,70 @@
 import type {
   BundledLanguage,
   BundledTheme,
+  CodeOptionsMeta,
+  CodeOptionsThemes,
+  CodeToHastOptionsCommon,
   LanguageRegistration,
   ThemeRegistrationAny,
-} from 'shiki'
-import type { ReactNode } from 'react'
-import type { Root } from 'hast'
-import type { DistributiveOmit } from '@/types'
-import * as base from './core'
-import { defineShikiConfig } from './config'
+} from 'shiki';
+import type { ReactNode } from 'react';
+import type { Root } from 'hast';
+import { defaultShikiFactory, wasmShikiFactory } from './shiki/full';
+import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as JsxRuntime from 'react/jsx-runtime';
+import { highlightHast as highlightHastBase } from './shiki';
+import { applyDefaultThemes, loadMissingLanguage, loadMissingTheme } from './utils';
 
-export type HighlightOptions = DistributiveOmit<
-  base.CoreHighlightOptions,
-  'config'
-> & {
-  /**
-   * The Regex Engine for Shiki
-   *
-   * @defaultValue 'js'
-   */
-  engine?: 'js' | 'oniguruma'
-}
+export type HighlightOptions = HighlightHastOptions & {
+  components?: Partial<Components>;
+};
 
-export async function highlightHast(
-  code: string,
-  options: HighlightOptions
-): Promise<Root> {
-  const engine = options.engine ?? 'js'
-  return base.highlightHast(code, {
-    ...options,
-    config: engine === 'js' ? configDefault : configWASM,
-  })
+export type HighlightHastOptions = CodeToHastOptionsCommon<BundledLanguage> &
+  CodeOptionsMeta & {
+    fallbackLanguage?: BundledLanguage | (string & {});
+    /**
+     * The Regex Engine for Shiki
+     *
+     * @defaultValue 'js'
+     */
+    engine?: 'js' | 'oniguruma';
+  } & (CodeOptionsThemes<BundledTheme> | Record<never, never>);
+
+export async function highlightHast(code: string, options: HighlightHastOptions): Promise<Root> {
+  const engine = options.engine ?? 'js';
+  const factory = engine === 'js' ? defaultShikiFactory : wasmShikiFactory;
+  const instance = await factory.getOrInit();
+
+  return highlightHastBase(instance, code, applyDefaultThemes(options));
 }
 
 /**
- * Get Shiki highlighter instance of xyzdocs (mostly for internal use, you should use Shiki directly over this).
+ * Get Shiki highlighter instance of Fumadocs (mostly for internal use, you should use Shiki directly over this).
  *
  * @param engineType - Shiki Regex engine to use.
  * @param options - Shiki options.
  */
 export async function getHighlighter(
   engineType: 'js' | 'oniguruma',
-  options?: {
-    langs?: (BundledLanguage | LanguageRegistration)[]
-    themes?: (BundledTheme | ThemeRegistrationAny)[]
-  }
+  options: {
+    langs?: (BundledLanguage | LanguageRegistration)[];
+    themes?: (BundledTheme | ThemeRegistrationAny)[];
+  } = {},
 ) {
-  return base.getHighlighter(
-    engineType === 'js' ? configDefault : configWASM,
-    options
-  )
+  const factory = engineType === 'js' ? defaultShikiFactory : wasmShikiFactory;
+  const instance = await factory.getOrInit();
+
+  await Promise.all([
+    options.langs && loadMissingLanguage(instance, options.langs),
+    options.themes && loadMissingTheme(instance, options.themes),
+  ]);
+  return instance;
 }
 
-export async function highlight(
-  code: string,
-  options: HighlightOptions
-): Promise<ReactNode> {
-  const engine = options.engine ?? 'js'
-
-  return base.highlight(code, {
-    ...options,
-    config: engine === 'js' ? configDefault : configWASM,
-  })
+export async function highlight(code: string, options: HighlightOptions): Promise<ReactNode> {
+  return toJsxRuntime(await highlightHast(code, options), {
+    ...JsxRuntime,
+    development: false,
+    components: options.components,
+  });
 }
-
-const defaultThemes = {
-  themes: {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
-}
-
-export const configDefault = defineShikiConfig({
-  defaultThemes,
-  async createHighlighter() {
-    const { createHighlighter } = await import('shiki')
-    const { createJavaScriptRegexEngine } =
-      await import('shiki/engine/javascript')
-
-    return createHighlighter({
-      langs: [],
-      themes: [],
-      engine: createJavaScriptRegexEngine(),
-    })
-  },
-})
-
-/** config using the WASM powered Regex engine */
-export const configWASM = defineShikiConfig({
-  defaultThemes,
-  async createHighlighter() {
-    const { createHighlighter, createOnigurumaEngine } = await import('shiki')
-    return createHighlighter({
-      langs: [],
-      themes: [],
-      engine: createOnigurumaEngine(import('shiki/wasm')),
-    })
-  },
-})

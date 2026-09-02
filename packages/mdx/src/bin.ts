@@ -9,11 +9,11 @@ async function start() {
   //   existsSync('next.config.mjs') ||
   //   existsSync('next.config.mts') ||
   //   existsSync('next.config.ts');
-  console.log('bin:')
+  //console.log('bin:')
   if (true) {
     const { postInstall } = await import('./next')
     await postInstall({ configPath, outDir })
-  } 
+  }
   // else {
   //   const { postInstall } = await import('./vite')
   //   await postInstall({ configPath, outDir })

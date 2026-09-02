@@ -105,7 +105,7 @@ var blog = defineCollections({
       //     id: 'package-manager',
       //   },
       // },
-      // remarkPlugins: [remarkSteps],
+      remarkPlugins: []
     })(environment);
   }
 });

@@ -9,7 +9,7 @@ import {
 import { toxyzdocsSource } from 'xyzdocs-mdx/runtime/server'
 
 // import { lucideIconsPlugin } from 'xyzdocs-core/source/lucide-icons';
-// console.log(docs)
+// //console.log(docs)
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toxyzdocsSource(),

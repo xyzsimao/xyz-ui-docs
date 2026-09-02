@@ -145,7 +145,7 @@ export type WebpackLoader = (
  */
 export function toWebpack(loader: Loader): WebpackLoader {
   return async function (source, callback) {
-    console.log('toWebpack')
+    //console.log('toWebpack')
     try {
       const result = await loader.load({
         filePath: this.resourcePath,

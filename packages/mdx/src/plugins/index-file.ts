@@ -5,7 +5,7 @@ import type {
   DocCollectionItem,
   MetaCollectionItem,
 } from '@/config/build'
-import path from 'path'
+import path from 'node:path'
 import { type CodeGen, createCodegen, ident, slash } from '@/utils/codegen'
 import { glob } from 'tinyglobby'
 import { createFSCache } from '@/utils/fs-cache'

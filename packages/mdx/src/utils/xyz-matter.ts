@@ -18,7 +18,7 @@ const regex = /^---\r?\n(.+?)\r?\n---\r?\n?/s
  * parse frontmatter, it supports only yaml format
  */
 export function xyzMatter(input: string): Output {
-  console.log('xyzMatter stuff')
+  //console.log('xyzMatter stuff')
   const output: Output = { matter: '', data: {}, content: input }
   const match = regex.exec(input)
   if (!match) {

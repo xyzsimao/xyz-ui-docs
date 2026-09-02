@@ -40,36 +40,36 @@ export async function mdxPreset(
       import('@/mdx-plugins/remark-heading').then((mod) => [
         mod.remarkHeading,
         {
-          generateToc: false,
+          generateToc: true,
           ...remarkHeadingOptions,
         },
       ]),
-    //   remarkImageOptions !== false &&
-    //     import('@/mdx-plugins/remark-image').then((mod) => [
-    //       mod.remarkImage,
-    //       remarkImageOptions,
-    //     ]),
-    //   remarkCodeTabOptions !== false &&
-    //     import('@/mdx-plugins/remark-code-tab').then((mod) => [
-    //       mod.remarkCodeTab,
-    //       remarkCodeTabOptions,
-    //     ]),
-    //   remarkNpmOptions !== false &&
-    //     import('@/mdx-plugins/remark-npm').then((mod) => [
-    //       mod.remarkNpm,
-    //       remarkNpmOptions,
-    //     ]),
-    //   ...v,
-    //   remarkStructureOptions !== false &&
-    //     import('@/mdx-plugins/remark-structure').then((mod) => [
-    //       mod.remarkStructure,
-    //       {
-    //         exportAs: 'structuredData',
-    //         ...remarkStructureOptions,
-    //       } satisfies Plugins.StructureOptions,
-    //     ]),
+      //   remarkImageOptions !== false &&
+      //     import('@/mdx-plugins/remark-image').then((mod) => [
+      //       mod.remarkImage,
+      //       remarkImageOptions,
+      //     ]),
+      //   remarkCodeTabOptions !== false &&
+      //     import('@/mdx-plugins/remark-code-tab').then((mod) => [
+      //       mod.remarkCodeTab,
+      //       remarkCodeTabOptions,
+      //     ]),
+      //   remarkNpmOptions !== false &&
+      //     import('@/mdx-plugins/remark-npm').then((mod) => [
+      //       mod.remarkNpm,
+      //       remarkNpmOptions,
+      //     ]),
+      //   ...v,
+      //   remarkStructureOptions !== false &&
+      //     import('@/mdx-plugins/remark-structure').then((mod) => [
+      //       mod.remarkStructure,
+      //       {
+      //         exportAs: 'structuredData',
+      //         ...remarkStructureOptions,
+      //       } satisfies Plugins.StructureOptions,
+      //     ]),
     ],
-    mdxOptions.remarkPlugins
+    mdxOptions.remarkPlugins,
   )
 
   const rehypePlugins = await resolvePlugins(

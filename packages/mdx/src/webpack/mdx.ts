@@ -14,7 +14,7 @@ export default async function loader(
   const options = this.getOptions()
   this.cacheable(true)
   this.addDependency(options.absoluteCompiledConfigPath)
-  console.log('WebpackLoader mdx loader')
+  //console.log('WebpackLoader mdx loader')
   if (!instance) {
     instance = toWebpack(
       createMdxLoader(
@@ -22,8 +22,8 @@ export default async function loader(
           core: getCore(options),
           buildConfig: false,
           mode: options.isDev ? 'dev' : 'production',
-        })
-      )
+        }),
+      ),
     )
   }
 
