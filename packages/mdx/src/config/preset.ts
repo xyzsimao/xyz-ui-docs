@@ -123,10 +123,10 @@ export function applyMdxPreset(
     const rehypePlugins = pluginOption(
       (v) => [
         // rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
-        // ...v,
-        // plugins.rehypeToc,
+        ...v,
+        plugins.rehypeToc,
       ],
-      mdxOptions.rehypePlugins
+      mdxOptions.rehypePlugins,
     )
 
     return {

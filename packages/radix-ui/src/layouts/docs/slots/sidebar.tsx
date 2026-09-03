@@ -284,7 +284,7 @@ function SidebarSeparator({ className, style, children, ...props }: ComponentPro
   return (
     <Base.SidebarSeparator
       className={cn(
-        'inline-flex items-center gap-2 mb-1 px-2 mt-6 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        'inline-flex gap-2 mb-1 px-2 mt-6 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
         depth === 0 && 'first:mt-0',
         className,
       )}
@@ -296,7 +296,7 @@ function SidebarSeparator({ className, style, children, ...props }: ComponentPro
     >
       {children}
     </Base.SidebarSeparator>
-  );
+  )
 }
 
 function SidebarItem({

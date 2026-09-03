@@ -40,7 +40,7 @@ export default defineConfig({
     onlyBundle: ['react-medium-image-zoom'],
   },
   exports: {
-    exclude: ['mdx.server', 'tailwind/typography'],
+    exclude: ['mdx.server'],
     customExports: {
       './style.css': './dist/style.css',
       './css/*': './css/*',

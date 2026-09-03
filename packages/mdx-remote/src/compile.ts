@@ -17,7 +17,7 @@ export type xyzdocsPresetOptions = Omit<
 
   remarkHeadingOptions?: Plugins.RemarkHeadingOptions | false
   // rehypeCodeOptions?: Plugins.RehypeCodeOptions | false
-  // rehypeTocOptions?: Plugins.RehypeTocOptions | false
+  rehypeTocOptions?: Plugins.RehypeTocOptions | false
   // remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false
   // remarkNpmOptions?: Plugins.RemarkNpmOptions | false
 
@@ -157,7 +157,7 @@ function getCompileOptions({
   preset: _,
   // rehypeCodeOptions,
   // remarkImageOptions,
-  // rehypeTocOptions,
+  rehypeTocOptions,
   remarkHeadingOptions,
   // remarkCodeTabOptions,
   // remarkNpmOptions,
@@ -175,7 +175,7 @@ function getCompileOptions({
   // const remarkNpm = getPlugin('remarkNpm')
   // const remarkImage = getPlugin('remarkImage')
   // const rehypeCode = getPlugin('rehypeCode')
-  // const rehypeToc = getPlugin('rehypeToc')
+  const rehypeToc = getPlugin('rehypeToc')
 
   return {
     ...options,
@@ -211,9 +211,9 @@ function getCompileOptions({
         // rehypeCode && rehypeCodeOptions !== false
         //   ? [rehypeCode, rehypeCodeOptions]
         //   : null,
-        // rehypeToc && rehypeTocOptions !== false
-        //   ? [rehypeToc, rehypeTocOptions]
-        //   : null,
+        rehypeToc && rehypeTocOptions !== false
+          ? [rehypeToc, rehypeTocOptions]
+          : null,
         ...v,
       ],
       options.rehypePlugins,

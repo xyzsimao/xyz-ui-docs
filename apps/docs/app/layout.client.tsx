@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { type ReactNode, useId } from 'react';
 import { cn } from '@/lib/cn';
  
-// import { getSection } from '@/lib/source/navigation';
+import { getSection } from '@/lib/source/navigation'
 import { AlbumIcon, Heart, LayoutTemplate } from 'lucide-react';
 import React from 'react';
 import { LinkItemType } from '@xyzdocs/ui_base/link-item'
@@ -43,15 +43,19 @@ export const linkItems: LinkItemType[] = [
 
 
 export function Body({ children }: { children: ReactNode }): React.ReactElement {
-  // const mode = useMode();
+  const mode = useMode()
 
-  return <body className={cn( 'relative flex min-h-screen flex-col')}>{children}</body>;
+  return (
+    <body className={cn(mode, 'relative flex min-h-screen flex-col')}>
+      {children}
+    </body>
+  )
 }
 
-// export function useMode(): string | undefined {
-//   const { slug = [] } = useParams();
-//   if (Array.isArray(slug)) return getSection(slug[0]);
-// }
+export function useMode(): string | undefined {
+  const { slug = [] } = useParams()
+  if (Array.isArray(slug)) return getSection(slug[0])
+}
 
 export function XyzdocsIcon(props: React.SVGProps<SVGSVGElement>) {
   const id = useId();

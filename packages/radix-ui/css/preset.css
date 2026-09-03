@@ -1,7 +1,7 @@
 @import './lib/base.css';
 @import './lib/shiki.css';
 
-@plugin '../dist/tailwind/typography.js';
+@plugin '../dist/typography/index.js';
 
 @import './generated/docs.css';
 @import './generated/home.css';

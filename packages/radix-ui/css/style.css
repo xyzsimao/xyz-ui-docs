@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import './neutral.css';
 @import './preset.css';
-@source '../dist/components/**/*.js';
+
 @layer base {
   body {
     @apply flex flex-col min-h-screen;

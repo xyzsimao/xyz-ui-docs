@@ -81,8 +81,6 @@ var blog = defineCollections({
   }),
   async: true,
   async mdxOptions(environment) {
-    const { rehypeCodeDefaultOptions } = await import("xyzdocs-core/mdx-plugins/rehype-code");
-    const { remarkSteps } = await import("xyzdocs-core/mdx-plugins/remark-steps");
     return applyMdxPreset({
       // rehypeCodeOptions: {
       //   inline: 'tailing-curly-colon',

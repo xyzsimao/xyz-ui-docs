@@ -18,7 +18,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
 
   if (!page) notFound()
   const { body: Mdx, toc } = await page.data.load()
-  console.log('toc' + JSON.stringify(toc))
+
   return (
     <article className="flex flex-col mx-auto w-full max-w-200 px-4 py-8">
       <div className="flex flex-row gap-4 text-sm mb-8">
@@ -56,7 +56,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
           </Link>
         </div>
 
-        {/* <InlineTOC items={toc} /> */}
+        <InlineTOC items={toc} />
         <Mdx components={components} />
       </div>
     </article>
