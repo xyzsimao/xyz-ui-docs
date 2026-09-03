@@ -63,18 +63,18 @@ export function RootProvider({
   //     </SearchProvider>
   //   );
 
-  // if (theme?.enabled !== false)
-  //   body = (
-  //     <ThemeProvider
-  //       attribute="class"
-  //       defaultTheme="system"
-  //       enableSystem
-  //       disableTransitionOnChange
-  //       {...theme}
-  //     >
-  //       {body}
-  //     </ThemeProvider>
-  //   );
+  if (theme?.enabled !== false)
+    body = (
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+        {...theme}
+      >
+        {body}
+      </ThemeProvider>
+    )
 
   // if (i18n) {
   //   body = <I18nProvider {...i18n}>{body}</I18nProvider>;
