@@ -27,7 +27,9 @@
     "content/**/*.mdx",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+,
+"tailwind.config.ts"
+],
   "exclude": [
     "node_modules",
     "eslint.config.mjs",

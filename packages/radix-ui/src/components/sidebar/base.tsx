@@ -196,14 +196,14 @@ export function SidebarViewport({
       <ScrollViewport
         {...viewport}
         className={cn(
-          '*:flex! *:flex-col! *:gap-0.5! p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]',
+          'flex! flex-col! gap-0.5 p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]',
           viewport?.className,
         )}
       >
         {children}
       </ScrollViewport>
     </ScrollArea>
-  );
+  )
 }
 
 export function SidebarDrawerOverlay(props: ComponentProps<'div'>) {

@@ -1,12 +1,14 @@
-
 @import "tailwindcss";
-@import 'xyzdocs-radix-ui/style.css';
-@import 'xyzdocs-radix-ui/css/preset.css';
-@import 'xyzdocs-radix-ui/css/shadcn.css';
-@import "./base.css";
 
 
 @theme {
+  --breakpoint-sm: 36rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+
+  
   --spacing-page: 1436px;
   --color-brand: hsl(26, 73%, 51%);
   --color-brand-foreground: white;
@@ -155,3 +157,8 @@ body {
     transform: translateX(212px);
   }
 }
+
+@import "./base.css";
+@import 'xyzdocs-radix-ui/style.css';
+@import 'xyzdocs-radix-ui/css/shadcn.css';
+@import 'xyzdocs-radix-ui/css/preset.css';

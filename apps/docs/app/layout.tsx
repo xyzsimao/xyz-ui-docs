@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
+import './global.css'
 import { Body } from './layout.client'
 import { RootProvider } from 'xyzdocs-radix-ui/provider/next'
 
@@ -29,8 +29,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
       <Body>
-        <RootProvider>
+        <RootProvider theme={{ enabled: true }}>
           {/* <TreeContextProvider tree={source.getPageTree()}>
             <Provider> */}
           {children}
