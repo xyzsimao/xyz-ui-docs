@@ -16,9 +16,10 @@ import {
 // import { getSuggestions } from './suggestions';
 import { PathUtils } from 'xyzdocs-core/source'
  
-import { NotFound } from '@/components/layouts/not-found'
+import { NotFound, Suggestion } from '@/components/layouts/not-found'
 import { createMetadata, getPageImageUrl } from '@/lib/metadata'
 import { source } from '@/lib/source'
+import { getMDXComponents } from '@/mdx-components'
 
 
 // function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -36,7 +37,15 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params
   const page = source.getPage(params.slug)
 
-  if (!page) return <>NotFound</>
+  if (!page)
+    return (
+      <NotFound
+        getSuggestions={function (): Promise<Suggestion[]> {
+          // throw new Error('Function not implemented.')
+          return Promise.resolve([])
+        }}
+      />
+    )
 
   const pageProps = {
     // tableOfContent: {
@@ -99,41 +108,39 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         {/* {page.data.preview && <PreviewRenderer preview={page.data.preview} />}
         <FeedbackText onSendAction={onBlockFeedbackAction}> */}
         <Mdx
-        // components={getMDXComponents({
-        //   ...Twoslash,
-        //   a({ href, ...props }) {
-        //     const found = source.getPageByHref(href ?? '', {
-        //       dir: PathUtils.dirname(page.path),
-        //     });
-
-        //     if (!found) return <Link href={href} {...props} />;
-
-        //     return (
-        //       <HoverCard>
-        //         <HoverCardTrigger
-        //           href={found.hash ? `${found.page.url}#${found.hash}` : found.page.url}
-        //           {...props}
-        //         >
-        //           {props.children}
-        //         </HoverCardTrigger>
-        //         <HoverCardContent className="text-sm">
-        //           <p className="font-medium">{found.page.data.title}</p>
-        //           <p className="text-fd-muted-foreground">{found.page.data.description}</p>
-        //         </HoverCardContent>
-        //       </HoverCard>
-        //     );
-        //   },
-        //   Banner,
-        //   Mermaid,
-        //   TypeTable,
-        //   Wrapper,
-        //   blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
-        //   DocsCategory: ({ url }) => {
-        //     return <DocsCategory url={url ?? page.url} />;
-        //   },
-        //   Installation,
-        //   Customization,
-        // })}
+          components={getMDXComponents({
+            //   ...Twoslash,
+            //   a({ href, ...props }) {
+            //     const found = source.getPageByHref(href ?? '', {
+            //       dir: PathUtils.dirname(page.path),
+            //     });
+            //     if (!found) return <Link href={href} {...props} />;
+            //     return (
+            //       <HoverCard>
+            //         <HoverCardTrigger
+            //           href={found.hash ? `${found.page.url}#${found.hash}` : found.page.url}
+            //           {...props}
+            //         >
+            //           {props.children}
+            //         </HoverCardTrigger>
+            //         <HoverCardContent className="text-sm">
+            //           <p className="font-medium">{found.page.data.title}</p>
+            //           <p className="text-fd-muted-foreground">{found.page.data.description}</p>
+            //         </HoverCardContent>
+            //       </HoverCard>
+            //     );
+            //   },
+            //   Banner,
+            //   Mermaid,
+            //   TypeTable,
+            //   Wrapper,
+            //   blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
+            //   DocsCategory: ({ url }) => {
+            //     return <DocsCategory url={url ?? page.url} />;
+            //   },
+            //   Installation,
+            //   Customization,
+          })}
         />
         {/* </FeedbackText> */}
         {/* {page.data.index ? <DocsCategory url={page.url} /> : null} */}

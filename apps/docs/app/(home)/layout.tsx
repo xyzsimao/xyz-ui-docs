@@ -16,23 +16,23 @@ export default function Layout({ children }: LayoutProps<'/'>) {
     <HomeLayout
       {...baseOptions()}
       links={[
-        {
-          type: 'menu',
-          on: 'menu',
-          text: 'Documentation',
-          items: [
-            {
-              text: 'Getting Started',
-              url: '/docs',
-              icon: <Book />,
-            },
-            {
-              text: 'Components',
-              url: '/docs/ui/components',
-              icon: <ComponentIcon />,
-            },
-          ],
-        },
+        // {
+        //   type: 'menu',
+        //   on: 'menu',
+        //   text: 'Documentation',
+        //   items: [
+        //     {
+        //       text: 'Getting Started',
+        //       url: '/docs',
+        //       icon: <Book />,
+        //     },
+        //     {
+        //       text: 'Components',
+        //       url: '/docs/ui/components',
+        //       icon: <ComponentIcon />,
+        //     },
+        //   ],
+        // },
         {
           type: 'custom',
           on: 'nav',

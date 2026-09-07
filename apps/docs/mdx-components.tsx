@@ -1,20 +1,20 @@
 import defaultMdxComponents from 'xyzdocs-radix-ui/mdx';
-// import * as FilesComponents from 'xyzdocs-ui/components/files';
-// import * as TabsComponents from 'xyzdocs-ui/components/tabs';
+import * as FilesComponents from 'xyzdocs-radix-ui/components/files'
+import * as TabsComponents from 'xyzdocs-radix-ui/components/tabs'
 import type { MDXComponents } from 'mdx/types';
-// import { Accordion, Accordions } from 'xyzdocs-ui/components/accordion';
+import { Accordion, Accordions } from 'xyzdocs-radix-ui/components/accordion'
 import * as icons from 'lucide-react';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     // ...(icons as unknown as MDXComponents),
     ...defaultMdxComponents,
-    // ...TabsComponents,
-    // ...FilesComponents,
-    // Accordion,
-    // Accordions,
+    ...TabsComponents,
+    ...FilesComponents,
+    Accordion,
+    Accordions,
     ...components,
-  } satisfies MDXComponents;
+  } satisfies MDXComponents
 }
 
 // declare module 'mdx/types.js' {

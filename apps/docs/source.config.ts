@@ -16,7 +16,8 @@ import {
 // import { shikiConfig } from './lib/shiki'
 // import type { RemarkAutoTypeTableOptions } from 'xyzdocs-typescript'
 // import { smoothuiLight } from '@/lib/themes/smoothui-light'
-
+import rehypeKatex from 'rehype-katex'
+import remarkMath from 'remark-math'
 export const docs = defineDocs({
   dir: 'content/docs',
   meta: {
@@ -39,14 +40,14 @@ export const docs = defineDocs({
     //   extractLinkReferences: true,
     // },
     async: true,
-    // preset: 'minimal',
+    // preset: 'xyzdocs',
     async mdxOptions(environment) {
-      // const { rehypeCodeDefaultOptions } =
-      //   await import('xyzdocs-core/mdx-plugins/rehype-code')
+      const { rehypeCodeDefaultOptions } =
+        await import('xyzdocs-core/mdx-plugins/rehype-code')
       // const { remarkStructureDefaultOptions } =
       //   await import('xyzdocs-core/mdx-plugins/remark-structure')
-      // const { remarkSteps } =
-      //   await import('xyzdocs-core/mdx-plugins/remark-steps')
+      const { remarkSteps } =
+        await import('xyzdocs-core/mdx-plugins/remark-steps')
       // const { remarkFeedbackBlock } =
       //   await import('xyzdocs-core/mdx-plugins/remark-feedback-block')
       // const { transformerTwoslash } = await import('xyzdocs-twoslash')
@@ -55,7 +56,7 @@ export const docs = defineDocs({
       // const { default: remarkMath } = await import('remark-math')
       // const { remarkTypeScriptToJavaScript } =
       //   await import('xyzdocs-docgen/remark-ts2js')
-      // const { default: rehypeKatex } = await import('rehype-katex')
+      const { default: rehypeKatex } = await import('rehype-katex')
       // const {
       //   remarkAutoTypeTable,
       //   createGenerator,
@@ -83,24 +84,24 @@ export const docs = defineDocs({
         // remarkStructureOptions: {
         //   types: [...remarkStructureDefaultOptions.types, 'code'],
         // },
-        // rehypeCodeOptions: {
-        //   langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-        //   inline: 'tailing-curly-colon',
-        //   themes: {
-        //     // light: 'catppuccin-latte',
-        //     // dark: 'catppuccin-mocha',
-        //     light: 'one-light',
-        //     // light: smoothuiLight,
-        //     dark: 'one-dark-pro',
-        //   },
-        //   transformers: [
-        //     ...(rehypeCodeDefaultOptions.transformers ?? []),
-        //     transformerTwoslash({
-        //       typesCache: createFileSystemTypesCache(),
-        //     }),
-        //     transformerEscape(),
-        //   ],
-        // },
+        rehypeCodeOptions: {
+          langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
+          inline: 'tailing-curly-colon',
+          themes: {
+            // light: 'catppuccin-latte',
+            // dark: 'catppuccin-mocha',
+            light: 'one-light',
+            // light: smoothuiLight,
+            dark: 'one-dark-pro',
+          },
+          transformers: [
+            ...(rehypeCodeDefaultOptions.transformers ?? []),
+            // transformerTwoslash({
+            //   typesCache: createFileSystemTypesCache(),
+            // }),
+            // transformerEscape(),
+          ],
+        },
         // remarkCodeTabOptions: {
         //   parseMdx: true,
         // },
@@ -109,14 +110,14 @@ export const docs = defineDocs({
         //     id: 'package-manager',
         //   },
         // },
-        // remarkPlugins: [
-        //   remarkSteps,
-        //   remarkMath,
-        //   [remarkFeedbackBlock, feedbackOptions],
-        //   [remarkAutoTypeTable, typeTableOptions],
-        //   remarkTypeScriptToJavaScript,
-        // ],
-        // rehypePlugins: (v) => [rehypeKatex, ...v],
+        remarkPlugins: [
+          remarkSteps,
+          remarkMath,
+          // [remarkFeedbackBlock, feedbackOptions],
+          // [remarkAutoTypeTable, typeTableOptions],
+          // remarkTypeScriptToJavaScript,
+        ],
+        // rehypePlugins: [rehypeKatex],
       })(environment)
     },
   },

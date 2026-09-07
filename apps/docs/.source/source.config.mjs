@@ -7,6 +7,7 @@ import {
   metaSchema,
   frontmatterSchema
 } from "xyzdocs-mdx/config";
+import remarkMath from "remark-math";
 var docs = defineDocs({
   dir: "content/docs",
   meta: {
@@ -28,30 +29,33 @@ var docs = defineDocs({
     //   extractLinkReferences: true,
     // },
     async: true,
-    // preset: 'minimal',
+    // preset: 'xyzdocs',
     async mdxOptions(environment) {
+      const { rehypeCodeDefaultOptions } = await import("xyzdocs-core/mdx-plugins/rehype-code");
+      const { remarkSteps } = await import("xyzdocs-core/mdx-plugins/remark-steps");
+      const { default: rehypeKatex } = await import("rehype-katex");
       return applyMdxPreset({
         // remarkStructureOptions: {
         //   types: [...remarkStructureDefaultOptions.types, 'code'],
         // },
-        // rehypeCodeOptions: {
-        //   langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-        //   inline: 'tailing-curly-colon',
-        //   themes: {
-        //     // light: 'catppuccin-latte',
-        //     // dark: 'catppuccin-mocha',
-        //     light: 'one-light',
-        //     // light: smoothuiLight,
-        //     dark: 'one-dark-pro',
-        //   },
-        //   transformers: [
-        //     ...(rehypeCodeDefaultOptions.transformers ?? []),
-        //     transformerTwoslash({
-        //       typesCache: createFileSystemTypesCache(),
-        //     }),
-        //     transformerEscape(),
-        //   ],
-        // },
+        rehypeCodeOptions: {
+          langs: ["ts", "js", "html", "tsx", "mdx"],
+          inline: "tailing-curly-colon",
+          themes: {
+            // light: 'catppuccin-latte',
+            // dark: 'catppuccin-mocha',
+            light: "one-light",
+            // light: smoothuiLight,
+            dark: "one-dark-pro"
+          },
+          transformers: [
+            ...rehypeCodeDefaultOptions.transformers ?? []
+            // transformerTwoslash({
+            //   typesCache: createFileSystemTypesCache(),
+            // }),
+            // transformerEscape(),
+          ]
+        },
         // remarkCodeTabOptions: {
         //   parseMdx: true,
         // },
@@ -60,14 +64,14 @@ var docs = defineDocs({
         //     id: 'package-manager',
         //   },
         // },
-        // remarkPlugins: [
-        //   remarkSteps,
-        //   remarkMath,
-        //   [remarkFeedbackBlock, feedbackOptions],
-        //   [remarkAutoTypeTable, typeTableOptions],
-        //   remarkTypeScriptToJavaScript,
-        // ],
-        // rehypePlugins: (v) => [rehypeKatex, ...v],
+        remarkPlugins: [
+          remarkSteps,
+          remarkMath
+          // [remarkFeedbackBlock, feedbackOptions],
+          // [remarkAutoTypeTable, typeTableOptions],
+          // remarkTypeScriptToJavaScript,
+        ]
+        // rehypePlugins: [rehypeKatex],
       })(environment);
     }
   }

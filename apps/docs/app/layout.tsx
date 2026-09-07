@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import './global.css'
+import './globals.css'
 import { Body } from './layout.client'
 import { RootProvider } from 'xyzdocs-radix-ui/provider/next'
+import type { Viewport } from 'next'
+import 'katex/dist/katex.css'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

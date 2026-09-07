@@ -17,7 +17,7 @@ export function DefaultLayout({ children }: LayoutProps<'/docs'>) {
       {...base}
       tree={source.getPageTree()}
       // just icon items
-      links={linkItems.filter((item) => item.type === 'icon')}
+      // links={linkItems.filter((item) => item.type === 'icon')}
       tabs={{
         transform(option, node) {
           const meta = source.getNodeMeta(node)

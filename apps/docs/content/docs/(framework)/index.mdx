@@ -1,0 +1,63 @@
+---
+title: Quick Start
+description: Getting Started with Fumadocs
+icon: Rocket
+---
+
+import { CpuIcon, PanelsTopLeftIcon, DatabaseIcon, TerminalIcon } from 'lucide-react';
+
+## Introduction
+
+Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework**, designed to be fast, flexible,
+and composes seamlessly into your React framework. It consists of multiple layers:
+
+```tsx title="page.tsx"
+import { notFound } from 'next/navigation';
+import { source } from '@/lib/source';
+
+export default async function Page({ params }) {
+  const { slugs } = await params;
+  const user = await getUser();
+  const page = source.getPage(slugs);
+
+  if (!page) notFound();
+  if (page.data.permission !== user.permission) notFound();
+
+  // render page...
+}
+```
+
+
+```npm
+npm create fumadocs-app
+```
+
+# Hello [step]
+
+## 1. First
+
+content
+
+### Little Tip
+
+content
+
+## 2. Second
+
+content
+
+## 1. Third
+
+content
+
+## Ended
+
+content
+
+# World [step]
+
+content
+
+# Bye [step]
+
+content

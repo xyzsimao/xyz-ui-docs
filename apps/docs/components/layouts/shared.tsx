@@ -17,15 +17,15 @@ export const linkItems: LinkItemType[] = [
     icon: <LayoutTemplate />,
     active: 'url',
   },
-  {
-    text: 'Sponsors',
-    url: 'https://fuma-nama.dev/sponsors',
-    external: true,
-    icon: <Heart />,
-  },
+  // {
+  //   text: 'Sponsors',
+  //   url: 'https://fuma-nama.dev/sponsors',
+  //   external: true,
+  //   icon: <Heart />,
+  // },
   {
     type: 'icon',
-    url: 'https://github.com/fuma-nama/fumadocs',
+    url: 'https://github.com/xyzsimao/xyz-ui-docs/tree/dev',
     label: 'github',
     text: 'Github',
     icon: (
@@ -35,7 +35,7 @@ export const linkItems: LinkItemType[] = [
     ),
     external: true,
   },
-];
+]
 
 export const logo = (
   <>
@@ -54,6 +54,7 @@ export const logo = (
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
+      // enabled: false,
       title: (
         <>
           {logo}

@@ -102,7 +102,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-10 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2 lg:mt-20">
+      <div className="grid  gap-10 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12   lg:grid-cols-2 lg:mt-20">
         <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-3xl xl:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span>{' '}
           documentation framework for{' '}

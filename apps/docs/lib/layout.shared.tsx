@@ -28,7 +28,7 @@ export const linkItems: LinkItemType[] = [
   },
   {
     type: 'icon',
-    url: 'https://github.com/xyzsimao/xyzdocs',
+    url: 'https://github.com/xyzsimao/xyz-ui-docs/tree/dev',
     label: 'github',
     text: 'Github',
     icon: (

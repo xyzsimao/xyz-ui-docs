@@ -115,9 +115,12 @@ export function LayoutBody(
           ...linkItems,
         }}
       >
-        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+        <slots.sidebar.provider
+          defaultOpenLevel={defaultOpenLevel}
+          prefetch={prefetch}
+        >
           <slots.container {...containerProps}>
-            {navEnabled && <slots.header />}
+            {/* {navEnabled && <slots.header />} */}
             {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
             {tabMode === 'top' && tabs.length > 0 && (
               <LayoutTabs
@@ -130,7 +133,7 @@ export function LayoutBody(
         </slots.sidebar.provider>
       </LayoutContext>
     </TreeContextProvider>
-  );
+  )
 }
 
 function LayoutTabs({
