@@ -142,12 +142,12 @@ function createNextCore(options: Required<CreateMDXOptions>): Core {
 }
 
 export async function postInstall(options: CreateMDXOptions) {
-  // const core = createNextCore(applyDefaults(options))
-  // console.log('core created')
-  // await core.init({
-  //   config: loadConfig(core, true),
-  // })
-  // await core.emit({ write: true })
+  const core = createNextCore(applyDefaults(options))
+  console.log('core created')
+  await core.init({
+    config: loadConfig(core, true),
+  })
+  await core.emit({ write: true })
 }
 
 async function init(dev: boolean, core: Core): Promise<void> {

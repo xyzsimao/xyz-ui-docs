@@ -36,6 +36,7 @@ export async function mdxPreset(
 
   const remarkPlugins = await resolvePlugins(
     (v) => [
+
       import('remark-gfm').then((mod) => mod.default),
       import('@/mdx-plugins/remark-heading').then((mod) => [
         mod.remarkHeading,

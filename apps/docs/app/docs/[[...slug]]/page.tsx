@@ -20,6 +20,7 @@ import { NotFound, Suggestion } from '@/components/layouts/not-found'
 import { createMetadata, getPageImageUrl } from '@/lib/metadata'
 import { source } from '@/lib/source'
 import { getMDXComponents } from '@/mdx-components'
+import { Mermaid } from '@/components/mdx/mermaid'
 
 
 // function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -131,7 +132,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
             //     );
             //   },
             //   Banner,
-            //   Mermaid,
+            Mermaid,
             //   TypeTable,
             //   Wrapper,
             //   blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,

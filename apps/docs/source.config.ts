@@ -16,8 +16,9 @@ import {
 // import { shikiConfig } from './lib/shiki'
 // import type { RemarkAutoTypeTableOptions } from 'xyzdocs-typescript'
 // import { smoothuiLight } from '@/lib/themes/smoothui-light'
-import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+
 export const docs = defineDocs({
   dir: 'content/docs',
   meta: {
@@ -56,7 +57,7 @@ export const docs = defineDocs({
       // const { default: remarkMath } = await import('remark-math')
       // const { remarkTypeScriptToJavaScript } =
       //   await import('xyzdocs-docgen/remark-ts2js')
-      const { default: rehypeKatex } = await import('rehype-katex')
+      // const { default: rehypeKatex } = await import('rehype-katex')
       // const {
       //   remarkAutoTypeTable,
       //   createGenerator,
@@ -80,28 +81,29 @@ export const docs = defineDocs({
       //   }),
       //   shiki: shikiConfig,
       // }
+
       return applyMdxPreset({
         // remarkStructureOptions: {
         //   types: [...remarkStructureDefaultOptions.types, 'code'],
         // },
-        rehypeCodeOptions: {
-          langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-          inline: 'tailing-curly-colon',
-          themes: {
-            // light: 'catppuccin-latte',
-            // dark: 'catppuccin-mocha',
-            light: 'one-light',
-            // light: smoothuiLight,
-            dark: 'one-dark-pro',
-          },
-          transformers: [
-            ...(rehypeCodeDefaultOptions.transformers ?? []),
-            // transformerTwoslash({
-            //   typesCache: createFileSystemTypesCache(),
-            // }),
-            // transformerEscape(),
-          ],
-        },
+        // rehypeCodeOptions: {
+        //   langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
+        //   inline: 'tailing-curly-colon',
+        //   themes: {
+        //     // light: 'catppuccin-latte',
+        //     // dark: 'catppuccin-mocha',
+        //     light: 'one-light',
+        //     // light: smoothuiLight,
+        //     dark: 'one-dark-pro',
+        //   },
+        //   transformers: [
+        //     ...(rehypeCodeDefaultOptions.transformers ?? []),
+        //     // transformerTwoslash({
+        //     //   typesCache: createFileSystemTypesCache(),
+        //     // }),
+        //     // transformerEscape(),
+        //   ],
+        // },
         // remarkCodeTabOptions: {
         //   parseMdx: true,
         // },
@@ -110,14 +112,25 @@ export const docs = defineDocs({
         //     id: 'package-manager',
         //   },
         // },
-        remarkPlugins: [
-          remarkSteps,
-          remarkMath,
-          // [remarkFeedbackBlock, feedbackOptions],
-          // [remarkAutoTypeTable, typeTableOptions],
-          // remarkTypeScriptToJavaScript,
+        // remarkPlugins: [
+        //   remarkSteps,
+        //   remarkMath,
+        //   // [remarkFeedbackBlock, feedbackOptions],
+        //   // [remarkAutoTypeTable, typeTableOptions],
+        //   // remarkTypeScriptToJavaScript,
+        // ],
+
+        remarkPlugins: (v) => [remarkSteps, ...v, remarkMath],
+        rehypePlugins: (v) => [
+          [
+            rehypeKatex,
+            {
+              throwOnError: false,
+              // KaTeX 其他选项
+            },
+          ] as any,
+          ...v,
         ],
-        // rehypePlugins: [rehypeKatex],
       })(environment)
     },
   },

@@ -5,6 +5,7 @@ import type { BuildEnvironment } from './build'
 
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[])
 
+
 export type DefaultMDXOptions = Omit<
   NonNullable<ProcessorOptions>,
   'rehypePlugins' | 'remarkPlugins' | '_ctx'

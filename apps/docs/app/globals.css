@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 @theme {
   /* 自定义或覆盖断点 */
   --breakpoint-sm: 40rem;    /* 640px */
