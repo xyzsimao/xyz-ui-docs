@@ -5,6 +5,9 @@ import { Body } from './layout.client'
 import { RootProvider } from 'xyzdocs-radix-ui/provider/next'
 import type { Viewport } from 'next'
 import 'katex/dist/katex.css'
+import { Provider } from './provider'
+import { TreeContextProvider } from 'xyzdocs-radix-ui/contexts/tree'
+import { source } from '@/lib/source'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -42,11 +45,9 @@ export default function RootLayout({
       </head>
       <Body>
         <RootProvider theme={{ enabled: true }}>
-          {/* <TreeContextProvider tree={source.getPageTree()}>
-            <Provider> */}
-          {children}
-          {/* </Provider>
-          </TreeContextProvider> */}
+          <TreeContextProvider tree={source.getPageTree()}>
+            <Provider>{children}</Provider>
+          </TreeContextProvider>
         </RootProvider>
       </Body>
     </html>
