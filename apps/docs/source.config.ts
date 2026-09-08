@@ -18,6 +18,9 @@ import {
 // import { smoothuiLight } from '@/lib/themes/smoothui-light'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+ 
+import remarkDirective from 'remark-directive'
+import { remarkDirectiveAdmonition } from 'xyzdocs-core/mdx-plugins'
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -120,7 +123,13 @@ export const docs = defineDocs({
         //   // remarkTypeScriptToJavaScript,
         // ],
 
-        remarkPlugins: (v) => [remarkSteps, ...v, remarkMath],
+        remarkPlugins: (v) => [
+          remarkSteps,
+          ...v,
+          remarkMath,
+          remarkDirective, // [!code ++]
+          remarkDirectiveAdmonition,
+        ],
         rehypePlugins: (v) => [
           [
             rehypeKatex,

@@ -71,6 +71,7 @@ export function applyMdxPreset(
 
     const remarkPlugins = pluginOption(
       (v) => [
+        plugins.remarkDirectiveAdmonition,
         plugins.remarkGfm,
         [
           plugins.remarkHeading,
