@@ -11,6 +11,7 @@ import {
 } from '@/loaders/mdx/remark-postprocess'
 import type { Core } from '@/core'
 import type { DocCollectionItem } from '@/config/build'
+import { resolveLastModified } from './last-modified'
 
 type Processor = ReturnType<typeof createProcessor>
 
@@ -84,7 +85,7 @@ export async function buildMDX(
     _compiler,
     environment,
     isDevelopment,
-  }: BuildMDXOptions
+  }: BuildMDXOptions,
 ): Promise<VFile> {
   const mdxOptions = await core
     .getConfig()
@@ -125,6 +126,14 @@ export async function buildMDX(
     cwd: collection?.cwd,
     data: { frontmatter, _compiler, _getProcessor: getProcessor },
   })
+
+  // the processor is cached per collection, so this per-file value rides the vfile instead.
+  // set after `transformVFile`, which may return a different vfile.
+  const lastModified = await resolveLastModified(collection, filePath)
+  if (lastModified) {
+    vfile.data['mdx-export'] ??= []
+    vfile.data['mdx-export'].push({ name: 'lastModified', value: lastModified })
+  }
 
   if (collection) {
     vfile = await core.transformVFile({ collection, filePath, source }, vfile)

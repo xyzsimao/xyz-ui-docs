@@ -8,8 +8,9 @@ import {
   metaSchema,
   frontmatterSchema,
 } from 'xyzdocs-mdx/config'
-// import jsonSchema from 'xyzdocs-mdx/plugins/json-schema'
-// import lastModified from 'xyzdocs-mdx/plugins/last-modified'
+ 
+import jsonSchema from 'xyzdocs-mdx/plugins/json-schema'
+import lastModified from 'xyzdocs-mdx/plugins/last-modified'
 // import type { ShikiTransformer } from 'shiki'
 // // import type { RemarkFeedbackBlockOptions } from 'xyzdocs-core/mdx-plugins'
 // import type { ElementContent } from 'hast'
@@ -21,6 +22,7 @@ import rehypeKatex from 'rehype-katex'
  
 import remarkDirective from 'remark-directive'
 import { remarkDirectiveAdmonition } from 'xyzdocs-core/mdx-plugins'
+import { InferPageType } from 'xyzdocs-core/source'
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -39,17 +41,18 @@ export const docs = defineDocs({
       method: z.string().optional(),
     }),
 
-    // postprocess: {
-    //   includeProcessedMarkdown: true,
-    //   extractLinkReferences: true,
-    // },
+    postprocess: {
+      includeProcessedMarkdown: true,
+      extractLinkReferences: true,
+    },
+    // lastModified: true,
     async: true,
     // preset: 'xyzdocs',
     async mdxOptions(environment) {
       const { rehypeCodeDefaultOptions } =
         await import('xyzdocs-core/mdx-plugins/rehype-code')
-      // const { remarkStructureDefaultOptions } =
-      //   await import('xyzdocs-core/mdx-plugins/remark-structure')
+      const { remarkStructureDefaultOptions } =
+        await import('xyzdocs-core/mdx-plugins/remark-structure')
       const { remarkSteps } =
         await import('xyzdocs-core/mdx-plugins/remark-steps')
       // const { remarkFeedbackBlock } =
@@ -86,9 +89,9 @@ export const docs = defineDocs({
       // }
 
       return applyMdxPreset({
-        // remarkStructureOptions: {
-        //   types: [...remarkStructureDefaultOptions.types, 'code'],
-        // },
+        remarkStructureOptions: {
+          types: [...remarkStructureDefaultOptions.types, 'code'],
+        },
         // rehypeCodeOptions: {
         //   langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
         //   inline: 'tailing-curly-colon',
@@ -208,11 +211,27 @@ export const blog = defineCollections({
 // }
 
 
-// export default defineConfig({
-//   plugins: [
-//     jsonSchema({
-//       insert: true,
-//     }),
-//     lastModified(),
-//   ],
-// })
+export default defineConfig({
+  plugins: [
+    jsonSchema({
+      insert: true,
+    }),
+    lastModified(),
+  ],
+})
+
+// export const getLLMText = async (page: InferPageType<typeof source>) => {
+//   const processed = await page.data.getText('raw')
+
+//   // Clean up the markdown for LLM consumption
+//   const cleaned = processed
+//     // Remove import statements
+//     .replace(/^import\s+.*?from\s+["'].*?["'];?\s*$/gm, '')
+//     // Collapse multiple consecutive blank lines into a single blank line
+//     .replace(/\n{3,}/g, '\n\n')
+//     .trim()
+
+//   return `# ${page.data.title}
+
+// ${cleaned}`
+// }

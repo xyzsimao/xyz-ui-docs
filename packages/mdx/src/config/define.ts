@@ -2,10 +2,10 @@ import type { StandardSchemaV1 } from '@standard-schema/spec'
 import type { MDXPresetOptions } from '@/config/preset'
 import type { ProcessorOptions } from '@mdx-js/mdx'
 import { metaSchema, pageSchema } from 'xyzdocs-core/source/schema'
-// import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess'
+import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess'
 import type { PluginOption } from '@/core'
 import type { BuildEnvironment } from './build'
-import { PostprocessOptions } from '@/loaders/mdx/remark-postprocess'
+import { LastModifiedFn } from '@/loaders/mdx/last-modified'
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -56,6 +56,14 @@ export interface DocCollection<
   dynamic?: boolean
 
   schema?: CollectionSchema<Schema, { path: string; source: string }>
+  /**
+   * Expose the last modified date of each document.
+   *
+   * - `true`: obtained from Git. Requires `git` to be installed. If you are using Vercel, please
+   *   set the `VERCEL_DEEP_CLONE` environment variable to `true`.
+   * - A function: return the last modified time for a given file path.
+   */
+  lastModified?: boolean | LastModifiedFn
 }
 
 export interface GlobalConfig {

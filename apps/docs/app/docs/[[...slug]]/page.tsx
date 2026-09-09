@@ -21,6 +21,11 @@ import { createMetadata, getPageImageUrl } from '@/lib/metadata'
 import { source } from '@/lib/source'
 import { getMDXComponents } from '@/mdx-components'
 import { Mermaid } from '@/components/mdx/mermaid'
+import { Separator } from '@/components/ui/separator'
+import { getLLMText } from '@/source.config'
+import { EditSource } from '@/components/edit-source'
+import { ScrollTop } from '@/components/scroll-top'
+import { CopyPage } from '@/components/copy-page'
 
 
 // function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -90,17 +95,35 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   //   );
   // }
 
-  const { body: Mdx, toc } = await page.data.load()
-
+  const { body: Mdx, toc, lastModified } = await page.data.load()
+  const markdown = await page.data.getText('raw')
+  // console.log('markdown', markdown)
   return (
-    <DocsPage toc={toc} {...pageProps}>
+    <DocsPage
+      tableOfContent={{
+        style: 'clerk',
+        footer: (
+          <div className="my-3 space-y-3">
+            <Separator />
+            <EditSource path={page.path} />
+            <ScrollTop />
+            {/* <Feedback /> */}
+            <CopyPage text={markdown} />
+            {/* <AskAI href={page.url} />
+            <OpenInChat href={page.url} /> */}
+          </div>
+        ),
+      }}
+      toc={toc}
+      {...pageProps}
+    >
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">
         {page.data.description}
       </p>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6 mb-4">
         {/* <MarkdownCopyButton markdownUrl={`${page.url}.mdx`} />
-        <ViewOptionsPopover
+     <ViewOptionsPopover
           markdownUrl={`${page.url}.mdx`}
           githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
         /> */}
@@ -147,7 +170,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         {/* {page.data.index ? <DocsCategory url={page.url} /> : null} */}
       </div>
       {/* <Feedback onSendAction={onPageFeedbackAction} /> */}
-      {/* {lastModified && <PageLastUpdate date={lastModified} />} */}
+      {lastModified && <PageLastUpdate date={lastModified} />}
     </DocsPage>
   )
 }

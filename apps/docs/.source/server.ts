@@ -23,7 +23,24 @@ import { frontmatter as __fd_glob_0 } from "../content/blog/2024-5-15.mdx?collec
 import { server } from 'xyzdocs-mdx/runtime/server';
 import type * as Config from '../source.config';
 
-const create = server<typeof Config, import("xyzdocs-mdx/runtime/types").InternalTypeConfig>({});
+const create = server<typeof Config, import("xyzdocs-mdx/runtime/types").InternalTypeConfig & {
+  DocData: {
+    blog: {
+      /**
+       * Last modified date of document file, obtained from version control.
+       *
+       */
+      lastModified?: Date;
+    },
+    docs: {
+      /**
+       * Last modified date of document file, obtained from version control.
+       *
+       */
+      lastModified?: Date;
+    },
+  }
+}>({"doc":{"passthroughs":["lastModified"]}});
 
 export const blog = await create.docLazy("blog", "content/blog", {"2024-5-15.mdx": __fd_glob_0, "2024-5-16.mdx": __fd_glob_1, "openapi-v10.mdx": __fd_glob_2, "test.mdx": __fd_glob_3, }, {"2024-5-15.mdx": () => import("../content/blog/2024-5-15.mdx?collection=blog"), "2024-5-16.mdx": () => import("../content/blog/2024-5-16.mdx?collection=blog"), "openapi-v10.mdx": () => import("../content/blog/openapi-v10.mdx?collection=blog"), "test.mdx": () => import("../content/blog/test.mdx?collection=blog"), });
 

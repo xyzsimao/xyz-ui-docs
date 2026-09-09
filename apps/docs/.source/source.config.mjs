@@ -3,10 +3,13 @@ import { z } from "zod";
 import {
   applyMdxPreset,
   defineCollections,
+  defineConfig,
   defineDocs,
   metaSchema,
   frontmatterSchema
 } from "xyzdocs-mdx/config";
+import jsonSchema from "xyzdocs-mdx/plugins/json-schema";
+import lastModified from "xyzdocs-mdx/plugins/last-modified";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkDirective from "remark-directive";
@@ -27,19 +30,21 @@ var docs = defineDocs({
        */
       method: z.string().optional()
     }),
-    // postprocess: {
-    //   includeProcessedMarkdown: true,
-    //   extractLinkReferences: true,
-    // },
+    postprocess: {
+      includeProcessedMarkdown: true,
+      extractLinkReferences: true
+    },
+    // lastModified: true,
     async: true,
     // preset: 'xyzdocs',
     async mdxOptions(environment) {
       const { rehypeCodeDefaultOptions } = await import("xyzdocs-core/mdx-plugins/rehype-code");
+      const { remarkStructureDefaultOptions } = await import("xyzdocs-core/mdx-plugins/remark-structure");
       const { remarkSteps } = await import("xyzdocs-core/mdx-plugins/remark-steps");
       return applyMdxPreset({
-        // remarkStructureOptions: {
-        //   types: [...remarkStructureDefaultOptions.types, 'code'],
-        // },
+        remarkStructureOptions: {
+          types: [...remarkStructureDefaultOptions.types, "code"]
+        },
         // rehypeCodeOptions: {
         //   langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
         //   inline: 'tailing-curly-colon',
@@ -130,7 +135,16 @@ var blog = defineCollections({
     })(environment);
   }
 });
+var source_config_default = defineConfig({
+  plugins: [
+    jsonSchema({
+      insert: true
+    }),
+    lastModified()
+  ]
+});
 export {
   blog,
+  source_config_default as default,
   docs
 };

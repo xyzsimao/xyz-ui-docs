@@ -1,63 +1,68 @@
-// import { App, Octokit } from 'octokit';
+import { App, Octokit } from 'octokit'
 // import {
 //   blockFeedback,
 //   BlockFeedback,
 //   pageFeedback,
 //   type ActionResponse,
 //   type PageFeedback,
-// } from '@/components/feedback/schema';
+// } from '@/components/feedback/schema'
 
-// export const repo = 'fumadocs';
-// export const owner = 'fuma-nama';
-// export const DocsCategory = 'Docs Feedback';
+export const repo = 'xyz-ui-docs'
+export const owner = 'xyzsimao'
+export const DocsCategory = 'Docs Feedback'
 
-// let instance: Octokit | undefined;
+let instance: Octokit | undefined
 
 // async function getOctokit(): Promise<Octokit> {
-//   if (instance) return instance;
-//   const appId = process.env.GITHUB_APP_ID;
-//   const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
-
+//   if (instance) return instance
+//   const appId = process.env.GITHUB_APP_ID
+//   const privateKey = process.env.GITHUB_APP_PRIVATE_KEY
+//   console.log('appId:' + appId)
 //   if (!appId || !privateKey) {
-//     throw new Error('No GitHub keys provided for Github app, docs feedback feature will not work.');
+//     throw new Error(
+//       'No GitHub keys provided for Github app, docs feedback feature will not work.',
+//     )
 //   }
 
 //   const app = new App({
 //     appId,
 //     privateKey,
-//   });
-
-//   const { data } = await app.octokit.request('GET /repos/{owner}/{repo}/installation', {
-//     owner,
-//     repo,
-//     headers: {
-//       'X-GitHub-Api-Version': '2022-11-28',
+//   })
+//   console.log('app:' + app)
+//   const { data } = await app.octokit.request(
+//     'GET /repos/{owner}/{repo}/installation',
+//     {
+//       owner,
+//       repo,
+//       headers: {
+//         'X-GitHub-Api-Version': '2022-11-28',
+//       },
 //     },
-//   });
-
-//   instance = await app.getInstallationOctokit(data.id);
-//   return instance;
+//   )
+//   console.log('app done')
+//   instance = await app.getInstallationOctokit(data.id)
+//   return instance
 // }
 
 // interface RepositoryInfo {
-//   id: string;
+//   id: string
 //   discussionCategories: {
 //     nodes: {
-//       id: string;
-//       name: string;
-//     }[];
-//   };
+//       id: string
+//       name: string
+//     }[]
+//   }
 // }
 
-// let cachedDestination: RepositoryInfo | undefined;
+// let cachedDestination: RepositoryInfo | undefined
 // async function getFeedbackDestination() {
-//   if (cachedDestination) return cachedDestination;
-//   const octokit = await getOctokit();
+//   if (cachedDestination) return cachedDestination
+//   const octokit = await getOctokit()
 
 //   const {
 //     repository,
 //   }: {
-//     repository: RepositoryInfo;
+//     repository: RepositoryInfo
 //   } = await octokit.graphql(`
 //   query {
 //     repository(owner: "${owner}", name: "${repo}") {
@@ -67,88 +72,102 @@
 //       }
 //     }
 //   }
-// `);
+// `)
 
-//   return (cachedDestination = repository);
+//   return (cachedDestination = repository)
 // }
 
-// export async function onPageFeedbackAction(feedback: PageFeedback): Promise<ActionResponse> {
-//   'use server';
-//   feedback = pageFeedback.parse(feedback);
-//   const url = new URL(feedback.url);
-
+// export async function onPageFeedbackAction(
+//   feedback: PageFeedback,
+// ): Promise<ActionResponse> {
+//   'use server'
+//   feedback = pageFeedback.parse(feedback)
 //   return createDiscussionThread(
-//     url.pathname,
+//     feedback.url,
 //     `[${feedback.opinion}] ${feedback.message}\n\n> Forwarded from user feedback.`,
-//   );
+//   )
 // }
 
-// export async function onBlockFeedbackAction(feedback: BlockFeedback): Promise<ActionResponse> {
-//   'use server';
-//   feedback = blockFeedback.parse(feedback);
-//   const url = new URL(feedback.url);
-//   url.hash = feedback.blockId;
-
+// export async function onBlockFeedbackAction(
+//   feedback: BlockFeedback,
+// ): Promise<ActionResponse> {
+//   'use server'
+//   console.log(feedback)
+//   feedback = blockFeedback.parse(feedback)
 //   return createDiscussionThread(
-//     url.pathname,
-//     `> ${feedback.blockBody}\n\n${feedback.message}\n\n> [Forwarded from user feedback](${url.href}).`,
-//   );
+//     feedback.url,
+//     `> ${feedback.blockBody ?? feedback.blockId}\n\n${feedback.message}\n\n> Forwarded from user feedback.`,
+//   )
 // }
 
 // async function createDiscussionThread(pageId: string, body: string) {
-//   const octokit = await getOctokit();
-//   const destination = await getFeedbackDestination();
+//   const octokit = await getOctokit()
+//   console.log(octokit)
+//   const destination = await getFeedbackDestination()
+//   console.log(destination.discussionCategories)
+
 //   const category = destination.discussionCategories.nodes.find(
 //     (category) => category.name === DocsCategory,
-//   );
+//   )
 
-//   if (!category) throw new Error(`Please create a "${DocsCategory}" category in GitHub Discussion`);
+//   if (!category)
+//     throw new Error(
+//       `Please create a "${DocsCategory}" category in GitHub Discussion`,
+//     )
 
-//   const title = `Feedback for ${pageId}`;
-//   const queryResult: {
+//   const title = `Feedback for ${pageId}`
+//   const {
 //     search: {
-//       nodes: { id: string; title: string; url: string }[];
-//     };
+//       nodes: [discussion],
+//     },
+//   }: {
+//     search: {
+//       nodes: { id: string; url: string }[]
+//     }
 //   } = await octokit.graphql(`
 //           query {
-//             search(type: DISCUSSION, query: ${JSON.stringify(`"${title}" in:title repo:${owner}/${repo} author:@me`)}, first: 10) {
+//             search(type: DISCUSSION, query: ${JSON.stringify(
+//               `${title} in:title repo:${owner}/${repo} author:@me`,
+//             )}, first: 1) {
 //               nodes {
-//                 ... on Discussion { id, title, url }
+//                 ... on Discussion { id, url }
 //               }
 //             }
-//           }`);
-
-//   const discussion = queryResult.search.nodes.find((item) => item.title === title);
+//           }`)
 
 //   if (discussion) {
 //     const result: {
 //       addDiscussionComment: {
-//         comment: { id: string; url: string };
-//       };
+//         comment: { id: string; url: string }
+//       }
 //     } = await octokit.graphql(`
 //             mutation {
-//               addDiscussionComment(input: { body: ${JSON.stringify(body)}, discussionId: "${discussion.id}" }) {
+//               addDiscussionComment(input: { body: ${JSON.stringify(
+//                 body,
+//               )}, discussionId: "${discussion.id}" }) {
 //                 comment { id, url }
 //               }
-//             }`);
+//             }`)
 
 //     return {
 //       githubUrl: result.addDiscussionComment.comment.url,
-//     };
+//     }
 //   } else {
 //     const result: {
-//       createDiscussion: {
-//         discussion: { id: string; url: string };
-//       };
+//       discussion: { id: string; url: string }
 //     } = await octokit.graphql(`
 //             mutation {
-//               createDiscussion(input: { repositoryId: "${destination.id}", categoryId: "${category.id}", body: ${JSON.stringify(body)}, title: ${JSON.stringify(title)} }) {
+//               createDiscussion(input: { repositoryId: "${
+//                 destination.id
+//               }", categoryId: "${category.id}", body: ${JSON.stringify(
+//                 body,
+//               )}, title: ${JSON.stringify(title)} }) {
 //                 discussion { id, url }
 //               }
-//             }`);
-
+//             }`)
+//     console.log(discussion)
 //     return {
-//       githubUrl: result.createDiscussion.discussion.url,
-//     };
+//       githubUrl: result.discussion.url,
+//     }
 //   }
 // }
