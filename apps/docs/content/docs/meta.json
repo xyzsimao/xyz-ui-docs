@@ -1,3 +1,10 @@
 {
-  "pages": ["mdx", "cli","miscellaneous"]
+  "pages": [
+    "javascript",
+    "markdown",
+    "design-system",
+    "mdx",
+    "cli",
+    "miscellaneous"
+  ]
 }

@@ -25,11 +25,10 @@
     "next-env.d.ts",
     "**/*.ts",
     "content/**/*.mdx",
+    "content/**/*.tsx",
     "**/*.tsx",
     ".next/types/**/*.ts"
-,
-"tailwind.config.ts"
-],
+  ],
   "exclude": [
     "node_modules",
     "eslint.config.mjs",

@@ -22,10 +22,11 @@ import { source } from '@/lib/source'
 import { getMDXComponents } from '@/mdx-components'
 import { Mermaid } from '@/components/mdx/mermaid'
 import { Separator } from '@/components/ui/separator'
-import { getLLMText } from '@/source.config'
 import { EditSource } from '@/components/edit-source'
 import { ScrollTop } from '@/components/scroll-top'
 import { CopyPage } from '@/components/copy-page'
+import { Example } from '@/components/example'
+import { ComponentPreview } from '@/components/shadcn_preview'
 
 
 // function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -133,6 +134,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <FeedbackText onSendAction={onBlockFeedbackAction}> */}
         <Mdx
           components={getMDXComponents({
+            ComponentPreview,
+            Example,
             //   ...Twoslash,
             //   a({ href, ...props }) {
             //     const found = source.getPageByHref(href ?? '', {

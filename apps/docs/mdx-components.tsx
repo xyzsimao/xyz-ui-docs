@@ -4,10 +4,12 @@ import * as TabsComponents from 'xyzdocs-radix-ui/components/tabs'
 import type { MDXComponents } from 'mdx/types';
 import { Accordion, Accordions } from 'xyzdocs-radix-ui/components/accordion'
 import * as icons from 'lucide-react';
+import { Color } from './components/color'
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     // ...(icons as unknown as MDXComponents),
+    Color,
     ...defaultMdxComponents,
     ...TabsComponents,
     ...FilesComponents,
