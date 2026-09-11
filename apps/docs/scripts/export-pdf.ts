@@ -5,14 +5,14 @@ const CHROME_EXECUTALBE_PATH = "/Applications/Google Chrome.app/Contents/MacOS/G
 const browser = await puppeteer.launch();
 const outDir = 'pdfs';
 // update this
-const urls = ['/docs/guides/export-pdf'];
+const urls = ['/docs/miscellaneous/markdown']
 
 async function exportPdf(pathname: string) {
 
   const page = await browser.newPage();
-  await page.goto('http://localhost:3000' + pathname, {
+  await page.goto('http://localhost:3001' + pathname, {
     waitUntil: 'networkidle2',
-  });
+  })
 
   await page.pdf({
     path: path.join(outDir, pathname.slice(1).replaceAll('/', '-') + '.pdf'),
