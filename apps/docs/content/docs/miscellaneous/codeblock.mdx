@@ -1,0 +1,29 @@
+---
+title: codeblock 自带组件
+description: codeblock 自带组件 demo
+icon: Pen
+---
+
+```js file=<rootDir>/code_snippets/js_demo.js title="js_demo.js" 
+```
+
+<include cwd meta='tab="components/mdx.tsx"'>
+  ./content/docs/miscellaneous/test_mdx.tsx
+</include>
+
+<include cwd meta='tab="app/docs/layout.tsx"'>
+  ./content/docs/miscellaneous/test_layout.tsx
+</include>
+
+
+<include  >
+  ./test_layout.tsx
+</include>
+
+```css title="app/app.css"
+/* [!code --] */
+@import 'tailwindcss';
+/* [!code ++:2] */
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```

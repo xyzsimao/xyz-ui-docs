@@ -27,6 +27,7 @@ import { ScrollTop } from '@/components/scroll-top'
 import { CopyPage } from '@/components/copy-page'
 import { Example } from '@/components/example'
 import { ComponentPreview } from '@/components/shadcn_preview'
+import { Card, Cards } from 'xyzdocs-radix-ui/components/card'
 
 
 // function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -162,15 +163,15 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
             //   TypeTable,
             //   Wrapper,
             //   blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
-            //   DocsCategory: ({ url }) => {
-            //     return <DocsCategory url={url ?? page.url} />;
-            //   },
+            DocsCategory: ({ url }) => {
+              return <DocsCategory url={url ?? page.url} />
+            },
             //   Installation,
             //   Customization,
           })}
         />
         {/* </FeedbackText> */}
-        {/* {page.data.index ? <DocsCategory url={page.url} /> : null} */}
+        {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
       {/* <Feedback onSendAction={onPageFeedbackAction} /> */}
       {lastModified && <PageLastUpdate date={lastModified} />}
@@ -178,25 +179,25 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   )
 }
 
-// function DocsCategory({ url }: { url: string }) {
-//   return (
-//     <Cards>
-//       {findSiblings(source.getPageTree(), url).map((item) => {
-//         if (item.type === 'separator') return;
-//         if (item.type === 'folder') {
-//           if (!item.index) return;
-//           item = item.index;
-//         }
+function DocsCategory({ url }: { url: string }) {
+  return (
+    <Cards>
+      {findSiblings(source.getPageTree(), url).map((item) => {
+        if (item.type === 'separator') return
+        if (item.type === 'folder') {
+          if (!item.index) return
+          item = item.index
+        }
 
-//         return (
-//           <Card key={item.url} title={item.name} href={item.url}>
-//             {item.description}
-//           </Card>
-//         );
-//       })}
-//     </Cards>
-//   );
-// }
+        return (
+          <Card key={item.url} title={item.name} href={item.url}>
+            {item.description}
+          </Card>
+        )
+      })}
+    </Cards>
+  )
+}
 
 export async function generateMetadata(
   props: PageProps<'/docs/[[...slug]]'>,
