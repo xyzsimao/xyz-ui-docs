@@ -5,7 +5,7 @@ icon: Pen
 ---
 
 import { cn } from '@/lib/cn'
-import { semanticColors, semanticLevels } from './color.ts'
+import { semanticColors, semanticLevels,oklchColors } from './color.ts'
 
 ## 颜色 `color`
 
@@ -35,7 +35,7 @@ import { semanticColors, semanticLevels } from './color.ts'
  className={`w-full h-8 rounded semantic-color-tile,  bg-${color.tailwind}-${level}`  }
  
         ></div> */}
-        <Color name={color.tailwind} shade={level} value={`bg-${color.tailwind}-${level}`} />
+        <Color name={color.tailwind} shade={level} oklchvalue={oklchColors[`--color-${color.tailwind}-${level}`]} />
             </div>
             {/* <div className="text-xs px-0.5 text-fore">{level} </div> */}
           </div>

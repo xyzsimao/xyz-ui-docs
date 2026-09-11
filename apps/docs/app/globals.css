@@ -3,7 +3,11 @@
 @source inline("text-{slate,gray,zinc,neutral,stone,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{50,{100..900..100},950}");
 @source inline("border-{slate,gray,zinc,neutral,stone,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{50,{100..900..100},950}");
 
+/* @import "./geist_theme.css"; */
+
+
 @theme {
+
   /* 自定义或覆盖断点 */
   --breakpoint-sm: 40rem;    /* 640px */
   --breakpoint-md: 48rem;    /* 768px */
@@ -34,9 +38,16 @@
   --color-brand-200: #fff7c8;
 }
 
+
+
 @theme inline {
-  --default-font-family: var(--font-sans);
-  --default-mono-font-family: var(--font-mono);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* --default-font-family: Helvetica, Tahoma, Arial, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑", sans-serif; */
+
+  /* --default-font-family: var(--font-geist-sans);
+  --default-mono-font-family: var(--font-geist-mono); */
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
 

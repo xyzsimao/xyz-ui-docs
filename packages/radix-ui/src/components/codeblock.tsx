@@ -93,7 +93,9 @@ export function CodeBlock({
       {...props}
       tabIndex={-1}
       className={cn(
-        inTab ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl' : 'my-4 bg-fd-card rounded-xl',
+        inTab
+          ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl'
+          : 'my-4 bg-fd-card rounded-xl',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
         'shiki relative border shadow-sm not-prose overflow-hidden text-sm',
@@ -131,7 +133,7 @@ export function CodeBlock({
         role="region"
         tabIndex={0}
         className={cn(
-          'text-[0.8125rem] py-3.5 overflow-auto max-h-[600px] fd-scroll-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring',
+          'font-mono text-[0.8125rem] py-3.5 overflow-auto max-h-[600px] fd-scroll-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring',
           viewportProps.className,
         )}
         style={
@@ -148,7 +150,7 @@ export function CodeBlock({
         {children}
       </div>
     </figure>
-  );
+  )
 }
 
 function CopyButton({

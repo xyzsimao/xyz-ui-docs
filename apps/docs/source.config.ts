@@ -23,6 +23,7 @@ import rehypeKatex from 'rehype-katex'
 import remarkDirective from 'remark-directive'
 import { remarkDirectiveAdmonition } from 'xyzdocs-core/mdx-plugins'
 import { InferPageType } from 'xyzdocs-core/source'
+import codeImport from 'remark-code-import'
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -132,6 +133,7 @@ export const docs = defineDocs({
           remarkMath,
           remarkDirective, // [!code ++]
           remarkDirectiveAdmonition,
+          codeImport as any,
         ],
         rehypePlugins: (v) => [
           [
