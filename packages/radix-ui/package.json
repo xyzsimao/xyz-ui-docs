@@ -7,6 +7,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./components/accordion": "./dist/components/accordion.js",
+    "./components/banner": "./dist/components/banner.js",
     "./components/callout": "./dist/components/callout.js",
     "./components/card": "./dist/components/card.js",
     "./components/codeblock": "./dist/components/codeblock.js",
@@ -19,6 +20,7 @@
     "./components/dynamic-codeblock.core": "./dist/components/dynamic-codeblock.core.js",
     "./components/files": "./dist/components/files.js",
     "./components/heading": "./dist/components/heading.js",
+    "./components/image-zoom": "./dist/components/image-zoom.js",
     "./components/inline-toc": "./dist/components/inline-toc.js",
     "./components/sidebar/base": "./dist/components/sidebar/base.js",
     "./components/sidebar/link-item": "./dist/components/sidebar/link-item.js",
@@ -32,10 +34,13 @@
     "./components/ui/accordion": "./dist/components/ui/accordion.js",
     "./components/ui/button": "./dist/components/ui/button.js",
     "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
+    "./components/ui/github-info": "./dist/components/ui/github-info.js",
     "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
     "./components/ui/popover": "./dist/components/ui/popover.js",
     "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
+    "./components/ui/steps": "./dist/components/ui/steps.js",
     "./components/ui/tabs": "./dist/components/ui/tabs.js",
+    "./components/ui/type-table": "./dist/components/ui/type-table.js",
     "./contexts/i18n": "./dist/contexts/i18n.js",
     "./contexts/search": "./dist/contexts/search.js",
     "./contexts/tree": "./dist/contexts/tree.js",
@@ -77,6 +82,7 @@
     "./utils/use-footer-items": "./dist/utils/use-footer-items.js",
     "./utils/use-is-scroll-top": "./dist/utils/use-is-scroll-top.js",
     "./package.json": "./package.json",
+    "./components/image-zoom2.css": "./dist/components/image-zoom2.css",
     "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
     "./utils/get-sidebar-tabs": "./dist/components/sidebar/tabs/index.js",
@@ -177,5 +183,8 @@
     "tailwindcss": {
       "optional": true
     }
+  },
+  "inlinedDependencies": {
+    "react-medium-image-zoom": "5.4.9"
   }
 }

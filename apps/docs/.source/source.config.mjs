@@ -46,24 +46,20 @@ var docs = defineDocs({
         remarkStructureOptions: {
           types: [...remarkStructureDefaultOptions.types, "code"]
         },
-        // rehypeCodeOptions: {
-        //   langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-        //   inline: 'tailing-curly-colon',
-        //   themes: {
-        //     // light: 'catppuccin-latte',
-        //     // dark: 'catppuccin-mocha',
-        //     light: 'one-light',
-        //     // light: smoothuiLight,
-        //     dark: 'one-dark-pro',
-        //   },
-        //   transformers: [
-        //     ...(rehypeCodeDefaultOptions.transformers ?? []),
-        //     // transformerTwoslash({
-        //     //   typesCache: createFileSystemTypesCache(),
-        //     // }),
-        //     // transformerEscape(),
-        //   ],
-        // },
+        rehypeCodeOptions: {
+          inline: "tailing-curly-colon",
+          themes: {
+            light: "one-light",
+            dark: "one-dark-pro"
+          },
+          transformers: [
+            ...rehypeCodeDefaultOptions.transformers ?? []
+            // transformerTwoslash({
+            //   typesCache: createFileSystemTypesCache(),
+            // }),
+            // transformerEscape(),
+          ]
+        },
         // remarkCodeTabOptions: {
         //   parseMdx: true,
         // },

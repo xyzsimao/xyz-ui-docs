@@ -28,16 +28,18 @@ import { CopyPage } from '@/components/copy-page'
 import { Example } from '@/components/example'
 import { ComponentPreview } from '@/components/shadcn_preview'
 import { Card, Cards } from 'xyzdocs-radix-ui/components/card'
+import { Installation } from '@/components/preview/installation'
+import * as Preview from '@/components/preview'
+import { ImageZoom } from 'xyzdocs-radix-ui/components/image-zoom'
 
+function PreviewRenderer({ preview }: { preview: string }): ReactNode {
+  if (preview && preview in Preview) {
+    const Comp = Preview[preview as keyof typeof Preview]
+    return <Comp />
+  }
 
-// function PreviewRenderer({ preview }: { preview: string }): ReactNode {
-//   if (preview && preview in Preview) {
-//     const Comp = Preview[preview as keyof typeof Preview];
-//     return <Comp />;
-//   }
-
-//   return null;
-// }
+  return null
+}
 
 export const revalidate = false
 
@@ -130,6 +132,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
           githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
         /> */}
       </div>
+      {page.data.preview && <PreviewRenderer preview={page.data.preview} />}
       <div className="prose flex-1 text-fd-foreground/90">
         {/* {page.data.preview && <PreviewRenderer preview={page.data.preview} />}
         <FeedbackText onSendAction={onBlockFeedbackAction}> */}
@@ -137,6 +140,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
           components={getMDXComponents({
             ComponentPreview,
             Example,
+            Installation,
+            img: (props) => <ImageZoom {...(props as any)} />,
             //   ...Twoslash,
             //   a({ href, ...props }) {
             //     const found = source.getPageByHref(href ?? '', {

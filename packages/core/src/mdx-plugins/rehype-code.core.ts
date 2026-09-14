@@ -1,11 +1,14 @@
 import type { Root } from 'hast';
 import rehypeShikiFromHighlighter, { type RehypeShikiCoreOptions } from './rehype-code/shiki';
 import {
+  transformerMetaWordHighlight,
+  transformerNotationErrorLevel,
+  transformerMetaHighlight,
   transformerNotationDiff,
   transformerNotationFocus,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
-} from '@shikijs/transformers';
+} from '@shikijs/transformers'
 import type { Processor, Transformer } from 'unified';
 import type { BuiltinLanguage, HighlighterCore, LanguageInput, ShikiTransformer } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
@@ -21,6 +24,11 @@ export function rehypeCodeDefaultOptions(): RehypeCodeOptionsCommon {
     ...defaultThemes,
     defaultLanguage: 'plaintext',
     transformers: [
+      transformerMetaWordHighlight(),
+      transformerMetaHighlight(),
+      transformerNotationErrorLevel({
+        matchAlgorithm: 'v3',
+      }),
       transformerNotationHighlight({
         matchAlgorithm: 'v3',
       }),
@@ -35,29 +43,34 @@ export function rehypeCodeDefaultOptions(): RehypeCodeOptionsCommon {
       }),
     ],
     parseMetaString(meta) {
-      const parsed = parseCodeBlockAttributes(meta, ['title', 'tab', 'noCopy', 'lineNumbers']);
-      const data: Record<string, unknown> = {};
+      const parsed = parseCodeBlockAttributes(meta, [
+        'title',
+        'tab',
+        'noCopy',
+        'lineNumbers',
+      ])
+      const data: Record<string, unknown> = {}
       for (const [k, v] of Object.entries(parsed.attributes)) {
         if (k === 'noCopy') {
-          data.allowCopy = 'false';
-          continue;
+          data.allowCopy = 'false'
+          continue
         }
 
         if (k === 'lineNumbers') {
-          data['data-line-numbers'] = true;
+          data['data-line-numbers'] = true
           if (typeof v === 'number') {
-            data['data-line-numbers-start'] = v;
+            data['data-line-numbers-start'] = v
           }
-          continue;
+          continue
         }
 
-        data[k] = v;
+        data[k] = v
       }
 
-      data.__raw = parsed.rest;
-      return data;
+      data.__raw = parsed.rest
+      return data
     },
-  };
+  }
 }
 
 export type RehypeCodeOptionsCommon = RehypeShikiCoreOptions & {

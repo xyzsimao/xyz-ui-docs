@@ -10,7 +10,7 @@ import type { FSWatcher } from 'chokidar'
 import { validate } from './utils/validation'
 import type { VFile } from 'vfile'
 import type { IndexFilePlugin } from './plugins/index-file'
-// import type { PostprocessOptions } from './config'
+import type { PostprocessOptions } from './config'
 import { ident } from './utils/codegen'
 
 export interface EmitEntry {
@@ -376,45 +376,45 @@ function docCollectionOf(collection: CollectionItem): DocCollectionItem | undefi
   }
 }
 
-// function postprocessPlugin(): Plugin {
-//   const LinkReferenceTypes = `{
-//   /**
-//    * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
-//    */
-//   extractedReferences: import("fumadocs-mdx").ExtractedReference[];
-// }`
+function postprocessPlugin(): Plugin {
+  const LinkReferenceTypes = `{
+  /**
+   * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
+   */
+  extractedReferences: import("fumadocs-mdx").ExtractedReference[];
+}`
 
-//   const LastModifiedTypes = `{
-//   /**
-//    * Last modified date of document file, obtained from version control.
-//    */
-//   lastModified?: Date;
-// }`
+  const LastModifiedTypes = `{
+  /**
+   * Last modified date of document file, obtained from version control.
+   */
+  lastModified?: Date;
+}`
 
-//   return {
-//     'index-file': {
-//       generateTypeConfig() {
-//         const lines: string[] = []
-//         lines.push('{')
-//         lines.push('  DocData: {')
-//         for (const collection of this.core.getCollections()) {
-//           const docs = docCollectionOf(collection)
-//           if (!docs) continue
+  return {
+    'index-file': {
+      generateTypeConfig() {
+        const lines: string[] = []
+        lines.push('{')
+        lines.push('  DocData: {')
+        for (const collection of this.core.getCollections()) {
+          const docs = docCollectionOf(collection)
+          if (!docs) continue
 
-//           const extras: string[] = []
-//           if (docs.postprocess?.extractLinkReferences)
-//             extras.push(LinkReferenceTypes)
-//           if (docs.lastModified) extras.push(LastModifiedTypes)
-//           if (extras.length === 0) continue
+          const extras: string[] = []
+          if (docs.postprocess?.extractLinkReferences)
+            extras.push(LinkReferenceTypes)
+          if (docs.lastModified) extras.push(LastModifiedTypes)
+          if (extras.length === 0) continue
 
-//           lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2))
-//         }
-//         lines.push('  }')
-//         lines.push('}')
-//         return lines.join('\n')
-//       },
-//     },
-//   }
-// }
+          lines.push(ident(`${collection.name}: ${extras.join(' & ')},`, 2))
+        }
+        lines.push('  }')
+        lines.push('}')
+        return lines.join('\n')
+      },
+    },
+  }
+}
 
 export type Core = ReturnType<typeof createCore>

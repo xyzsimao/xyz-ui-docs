@@ -26,4 +26,69 @@ icon: Pen
 /* [!code ++:2] */
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+// [!code word:config]
+const config = {  
+  // [!code highlight]
+  reactStrictMode: true,  
+}; // [!code highlight]
+
+
+ 
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html>
+      <body> 
+        <RootProvider  
+          search={{
+            enabled: false, // disable search entirely
+            SearchDialog, // replace search dialog
+          }}
+          {children}
+        </RootProvider>
+      </body>
+    </html>
+  );
+}
 ```
+
+```js {1,7-9}  title="test.js"
+/* [!code --] */
+@import 'tailwindcss';
+/* [!code ++:2] */
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+console.log('1')
+console.log('2')
+console.log('3')
+console.log('4')
+
+
+console.log('Not focused');
+console.log('Focused') // [!code focus]
+console.log('Not focused');
+
+// [!code highlight:3]
+console.log('Highlighted')
+console.log('Highlighted')
+console.log('Highlighted')
+console.log('Not highlighted')
+
+console.log('没有错误或警告')
+console.error('错误') // [!code error]
+console.warn('警告') // [!code warning]
+console.log('信息') // [!code info]
+
+// [!code word:Hello]
+const msg = 'Hello World'
+console.log(msg)
+console.log(msg) // 打印 Hello World
+```
+
+<HighlightedCode filename="code"  code={`
+const msg = 'Hello World'
+console.log(msg)
+console.log(msg)
+`} lang="ts"/>

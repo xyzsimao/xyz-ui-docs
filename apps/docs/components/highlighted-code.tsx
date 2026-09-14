@@ -138,19 +138,24 @@ export const HighlightedCode = async ({
     // theme: geistShikiTheme,
     components: {
       pre: ({ children, className, style }: ComponentProps<'pre'>) => (
-        <CodeBlock className={className} style={style} title={filename}>
+        <CodeBlock
+          lang="js"
+          className={className}
+          style={style}
+          title={filename}
+        >
           {children}
         </CodeBlock>
       ),
     },
-  });
+  })
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="*:mb-0 *:h-full flex-1 [&_[data-slot=card-header]>div:first-child]:hidden">
+    <div className="flex  flex-col">
+      <div className="  flex-1 [&_[data-slot=card-header]>div:first-child]:hidden">
         {rendered}
       </div>
       {/* <span className="mt-2 block text-copy-14 text-gray-900">{caption}</span> */}
     </div>
-  );
+  )
 };

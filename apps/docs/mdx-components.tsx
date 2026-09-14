@@ -5,6 +5,7 @@ import type { MDXComponents } from 'mdx/types';
 import { Accordion, Accordions } from 'xyzdocs-radix-ui/components/accordion'
 import * as icons from 'lucide-react';
 import { Color } from './components/color'
+import { HighlightedCode } from './components/highlighted-code'
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -15,6 +16,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...FilesComponents,
     Accordion,
     Accordions,
+    HighlightedCode,
     ...components,
   } satisfies MDXComponents
 }
